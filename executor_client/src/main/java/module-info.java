@@ -5,5 +5,5 @@ module executor.client {
     requires libthrift;
     requires node.client;
     requires slf4j.api;
-    requires general;
+    requires com.credits.general;
 }

@@ -1,4 +1,4 @@
-module general {
+module com.credits.general {
     requires libthrift;
     requires org.apache.commons.lang3;
     requires java.compiler;

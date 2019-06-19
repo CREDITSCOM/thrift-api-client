@@ -1,7 +1,7 @@
 module node.client {
     requires libthrift;
     requires jsr250.api;
-    requires general;
+    requires com.credits.general;
     requires commons.codec;
     requires eddsa;
     requires slf4j.api;

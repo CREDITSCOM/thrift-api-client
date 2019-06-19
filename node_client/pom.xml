@@ -56,6 +56,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>net.i2p.crypto</groupId>
+            <artifactId>eddsa</artifactId>
+            <version>0.2.0</version>
+        </dependency>
+        <dependency>
             <groupId>com.credits.client</groupId>
             <artifactId>general</artifactId>
             <version>1.0</version>
