@@ -258,7 +258,7 @@ public class GeneralConverter {
         throw new IllegalArgumentException(String.format("Unsupported type of value: %s", value.getClass().getSimpleName()));
     }
 
-    public static List<ByteCodeObjectData> compilationPackageToByteCodeObjects(
+    public static List<ByteCodeObjectData> compilationPackageToByteCodeObjectsData(
             CompilationPackage compilationPackage) {
         List<ByteCodeObjectData> compilationUnits = new ArrayList<>();
         compilationPackage.getUnits().forEach(unit -> compilationUnits.add(new ByteCodeObjectData(unit.getName(), unit.getByteCode())));
