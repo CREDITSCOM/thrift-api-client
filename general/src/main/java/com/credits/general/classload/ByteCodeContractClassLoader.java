@@ -2,12 +2,12 @@ package com.credits.general.classload;
 
 import java.io.Serializable;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.WeakHashMap;
 
 public class ByteCodeContractClassLoader extends ClassLoader {
-    private Map<String, ClassObject> classes = new HashMap<>();
+    private Map<String, ClassObject> classes = new WeakHashMap<>();
 
     public Class<?> loadClass(String className, byte[] byteCode) {
         Class<?> clazz;
