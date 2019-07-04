@@ -6,25 +6,17 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
 
-import static java.util.Collections.EMPTY_LIST;
 import static java.util.stream.Collectors.joining;
 
 public class CompilationException extends CreditsException {
     private static final long serialVersionUID = 6535841421292200543L;
-    private List<Error> errors;
 
-    @SuppressWarnings("unchecked")
     public CompilationException(String message) {
-        this(message, EMPTY_LIST);
-    }
-
-    public CompilationException(List<Error> errors) {
-        this("compilation errors:\n" + errors.stream().map(error -> error.lineNumber + ":" + error.errorMessage).collect(joining("\n")));
-    }
-
-    public CompilationException(String message, List<Error> errors) {
         super(message);
-        this.errors = errors;
+    }
+    public CompilationException(String classname, List<Error> errors) {
+        super("compilation errors in class " + classname + " :\n"
+                      + errors.stream().map(error -> error.lineNumber + ":" + error.errorMessage).collect(joining("\n")));
     }
 
     public static class Error implements Serializable {
@@ -55,7 +47,7 @@ public class CompilationException extends CreditsException {
             }
             Error error = (Error) o;
             return lineNumber == error.lineNumber &&
-                Objects.equals(errorMessage, error.errorMessage);
+                    Objects.equals(errorMessage, error.errorMessage);
         }
 
         @Override
