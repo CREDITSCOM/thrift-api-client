@@ -5,11 +5,11 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>node_client</artifactId>
     <packaging>jar</packaging>
-    <version>1.1</version>
+    <version>1.2</version>
     <parent>
         <artifactId>api-client</artifactId>
         <groupId>com.credits.client</groupId>
-        <version>1.1</version>
+        <version>1.2</version>
     </parent>
 
     <properties>
