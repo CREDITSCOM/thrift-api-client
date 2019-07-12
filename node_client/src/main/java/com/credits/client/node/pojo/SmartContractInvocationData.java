@@ -9,6 +9,7 @@ import java.util.List;
 
 public class SmartContractInvocationData implements Serializable {
     private static final long serialVersionUID = 4544650022718657168L;
+    public static final short SMART_CONTRACT_INVOCATION_VERSION = 1;
     private SmartContractDeployData smartContractDeployData;
     private String method;
     private List<Variant> params;

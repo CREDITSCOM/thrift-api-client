@@ -5,12 +5,12 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>executor_client</artifactId>
     <packaging>jar</packaging>
-    <version>1.0</version>
+    <version>1.2</version>
 
     <parent>
         <artifactId>api-client</artifactId>
         <groupId>com.credits.client</groupId>
-        <version>1.0</version>
+        <version>1.2</version>
     </parent>
 
     <build>
@@ -21,13 +21,13 @@
         <dependency>
             <groupId>com.credits.client</groupId>
             <artifactId>general</artifactId>
-            <version>1.0</version>
+            <version>1.1</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.credits.client</groupId>
             <artifactId>node_client</artifactId>
-            <version>1.0</version>
+            <version>1.1</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>

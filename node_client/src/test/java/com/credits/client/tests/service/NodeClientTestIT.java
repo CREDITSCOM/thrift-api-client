@@ -1,14 +1,7 @@
 package com.credits.client.tests.service;
 
 import com.credits.client.node.exception.NodeClientException;
-import com.credits.client.node.pojo.SmartContractData;
-import com.credits.client.node.pojo.SmartContractDeployData;
-import com.credits.client.node.pojo.SmartContractInvocationData;
-import com.credits.client.node.pojo.SmartContractTransactionFlowData;
-import com.credits.client.node.pojo.TokenStandartData;
-import com.credits.client.node.pojo.TransactionData;
-import com.credits.client.node.pojo.TransactionFlowData;
-import com.credits.client.node.pojo.TransactionIdData;
+import com.credits.client.node.pojo.*;
 import com.credits.client.node.service.NodeApiService;
 import com.credits.client.node.service.NodeApiServiceImpl;
 import com.credits.client.node.service.NodeThriftApiClient;
@@ -116,7 +109,7 @@ public class NodeClientTestIT {
         String walletBASE58 = "AoRKdBEbozwTKt5sirqx6ERv2DPsrvTk81hyztnndgWC";
         SmartContractData smartContractData;
         smartContractData = nodeService.getSmartContract(walletBASE58);
-        LOGGER.info("Smart contract hashState = {}", smartContractData.getSmartContractDeployData().getHashState());
+        LOGGER.info("Smart executor hashState = {}", smartContractData.getSmartContractDeployData().getHashState());
     }
 
     @Test

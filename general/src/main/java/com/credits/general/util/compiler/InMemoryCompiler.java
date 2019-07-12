@@ -7,21 +7,13 @@ import com.credits.general.util.compiler.model.JavaSourceFromString;
 import com.credits.general.util.sourceCode.GeneralSourceCodeUtils;
 import org.apache.commons.lang3.SystemUtils;
 
-import javax.tools.Diagnostic;
-import javax.tools.DiagnosticCollector;
-import javax.tools.JavaCompiler;
+import javax.tools.*;
 import javax.tools.JavaCompiler.CompilationTask;
-import javax.tools.JavaFileObject;
-import javax.tools.ToolProvider;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.net.URLDecoder;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Pattern;
 
 import static java.util.Collections.singletonList;
@@ -129,7 +121,7 @@ public class InMemoryCompiler {
                 );
                 errors.add(error);
             });
-            throw new CompilationException(errors);
+            throw new CompilationException(className, errors);
         }
         return compilationPackage;
     }

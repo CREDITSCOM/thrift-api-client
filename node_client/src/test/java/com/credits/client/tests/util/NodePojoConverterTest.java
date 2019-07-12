@@ -12,8 +12,8 @@ import java.nio.ByteBuffer;
 
 import static com.credits.client.node.thrift.generated.TransactionType.TT_Normal;
 import static com.credits.client.node.util.NodePojoConverter.*;
-import static com.credits.general.util.GeneralConverter.bigDecimalToAmount;
 import static com.credits.general.util.Constants.DECIMAL_SEPARATOR;
+import static com.credits.general.util.GeneralConverter.bigDecimalToAmount;
 import static com.credits.general.util.GeneralConverter.toBigDecimal;
 
 
@@ -56,7 +56,8 @@ public class NodePojoConverterTest {
                 ByteBuffer.wrap("signature".getBytes()),
                 new AmountCommission((short)1),
                 0,
-                TT_Normal
+                TT_Normal,
+                0
         );
         SealedTransaction sealedTransaction = new SealedTransaction(transactionId, transaction);
         TransactionData transactionData = createTransactionData(sealedTransaction);
@@ -78,7 +79,8 @@ public class NodePojoConverterTest {
                 ByteBuffer.wrap("signature".getBytes()),
                 new AmountCommission((short)1),
                 0,
-                TT_Normal
+                TT_Normal,
+                0
         );
         TransactionData transactionData = createTransactionData(transaction);
         Assert.assertEquals(

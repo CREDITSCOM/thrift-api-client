@@ -10,10 +10,10 @@ import org.apache.commons.codec.binary.Hex;
 
 import java.math.BigDecimal;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
 import java.util.Locale;
 import java.util.stream.Collectors;
 
+import static com.credits.client.node.pojo.SmartContractInvocationData.SMART_CONTRACT_INVOCATION_VERSION;
 import static com.credits.general.util.GeneralConverter.*;
 import static com.credits.general.util.GeneralPojoConverter.createApiResponseData;
 
@@ -228,13 +228,14 @@ public class NodePojoConverter {
     public static SmartContractInvocation createSmartContractInvocation(
         SmartContractInvocationData smartContractInvocationData) {
 
-        SmartContractInvocation thriftStruct =
-            new SmartContractInvocation(smartContractInvocationData.getMethod(), smartContractInvocationData.getParams(),
-                    smartContractInvocationData.getUsedContracts(), smartContractInvocationData.isForgetNewState());//todo add "надо будет передавать потом поля с форм"
+        final var thriftStruct = new SmartContractInvocation(SMART_CONTRACT_INVOCATION_VERSION,
+                                                             smartContractInvocationData.getMethod(),
+                                                             smartContractInvocationData.getParams(),
+                                                             smartContractInvocationData.getUsedContracts(),
+                                                             smartContractInvocationData.isForgetNewState());
         SmartContractDeployData smartContractDeployData = smartContractInvocationData.getSmartContractDeployData();
         if (smartContractDeployData != null) {
-            thriftStruct.setSmartContractDeploy(
-                smartContractDeployDataToSmartContractDeploy(smartContractDeployData));
+            thriftStruct.setSmartContractDeploy(smartContractDeployDataToSmartContractDeploy(smartContractDeployData));
         }
 
         return thriftStruct;

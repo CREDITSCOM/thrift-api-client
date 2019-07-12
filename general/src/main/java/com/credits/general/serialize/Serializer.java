@@ -9,11 +9,11 @@ public class Serializer {
 
     public static Object deserialize(byte[] contractState, ClassLoader classLoader) {
         Object instance;
-        requireNonNull(contractState, "contract state can't be null");
+        requireNonNull(contractState, "executor state can't be null");
         try (ObjectInputStream ous = new ObjectInputStreamWithClassLoader(new ByteArrayInputStream(contractState), classLoader)) {
             instance = ous.readObject();
         } catch (IOException | ClassNotFoundException e) {
-            throw new RuntimeException("cannot getObject smart contract instance. " + e);
+            throw new RuntimeException("cannot getObject smart executor instance. " + e);
         }
         return Optional.ofNullable(instance).orElseThrow(() -> new RuntimeException("cannot deserialize object. Object size = " + contractState.length));
     }
@@ -24,7 +24,7 @@ public class Serializer {
         try (ObjectOutputStream ous = new ObjectOutputStream(baos)) {
             ous.writeObject(instance);
         } catch (IOException e) {
-            throw new RuntimeException("Cannot serialize smart contract instance. " + e);
+            throw new RuntimeException("Cannot serialize smart executor instance. " + e);
         }
         return baos.toByteArray();
     }
