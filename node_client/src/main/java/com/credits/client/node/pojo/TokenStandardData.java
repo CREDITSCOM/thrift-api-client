@@ -13,7 +13,7 @@ public enum TokenStandardData {
     BASIC_TOKEN_STANDARD(3, BasicTokenStandard.class),
     EXTENSION_TOKEN_STANDARD(4, ExtensionTokenStandard.class);
 
-    private long id;
+    private int id;
     private Class<?> clazz;
 
     private TokenStandardData(int value, Class<?> clazz) {
@@ -21,7 +21,7 @@ public enum TokenStandardData {
         this.clazz = clazz;
     }
 
-    public long getId() {
+    public int getId() {
         return id;
     }
 

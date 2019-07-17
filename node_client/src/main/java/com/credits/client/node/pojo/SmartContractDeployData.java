@@ -13,9 +13,9 @@ public class SmartContractDeployData implements Serializable {
     private final String sourceCode;
     private final List<ByteCodeObjectData> byteCodeObjectDataList;
     private final String hashState; //unused
-    private final long tokenStandardId;
+    private final int tokenStandardId;
 
-    public SmartContractDeployData(String sourceCode, List<ByteCodeObjectData> byteCodeObjectDataList,  long tokenStandardId) {
+    public SmartContractDeployData(String sourceCode, List<ByteCodeObjectData> byteCodeObjectDataList,  int tokenStandardId) {
         this.sourceCode = sourceCode;
         this.byteCodeObjectDataList = byteCodeObjectDataList;
         this.tokenStandardId = tokenStandardId;
@@ -34,7 +34,7 @@ public class SmartContractDeployData implements Serializable {
         return hashState;
     }
 
-    public long getTokenStandardId() {
+    public int getTokenStandardId() {
         return tokenStandardId;
     }
 

@@ -211,11 +211,11 @@ public class NodePojoConverter {
     public static SmartContractInvocation createSmartContractInvocation(
         SmartContractInvocationData smartContractInvocationData) {
 
-        final var thriftStruct = new SmartContractInvocation(SMART_CONTRACT_INVOCATION_VERSION,
-                                                             smartContractInvocationData.getMethod(),
+        final var thriftStruct = new SmartContractInvocation(smartContractInvocationData.getMethod(),
                                                              smartContractInvocationData.getParams(),
                                                              smartContractInvocationData.getUsedContracts(),
-                                                             smartContractInvocationData.isForgetNewState());
+                                                             smartContractInvocationData.isForgetNewState(),
+                                                             SMART_CONTRACT_INVOCATION_VERSION);
         SmartContractDeployData smartContractDeployData = smartContractInvocationData.getSmartContractDeployData();
         if (smartContractDeployData != null) {
             thriftStruct.setSmartContractDeploy(smartContractDeployDataToSmartContractDeploy(smartContractDeployData));

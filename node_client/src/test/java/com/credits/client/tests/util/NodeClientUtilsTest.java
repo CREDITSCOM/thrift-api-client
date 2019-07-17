@@ -28,8 +28,8 @@ public class NodeClientUtilsTest {
 
         byte[] smartContractBytes = NodeClientUtils.serializeByThrift(smartContractData);
         Assert.assertEquals(
-                GeneralConverter.encodeToBASE58(smartContractBytes),
-                "2ASrkPavJqgA98UrUpHYNAV2Am4YBvNYrA7NjyrsYcdeAw9ovDkVjctnMyiLiHGZKbrRzng9fwsCtH5onCWZ7jUShPrajwKyCo8LtDJf94AGt9RRsznyhy1"
+                "BJoykvqsEt5sSAzsgvHeo2px3SefDH7gotPequ2V6hENTJXNLt3P7jB9EXXjEdQZ6p4y2jSnGRZc7WTneeavcNynp7KsVEfHmjtLoHP3fj16K2doV",
+                GeneralConverter.encodeToBASE58(smartContractBytes)
         );
     }
 }
