@@ -117,7 +117,7 @@ public class NodePojoConverter {
         thriftStruct.setByteCodeObjects(
             GeneralConverter.byteCodeObjectsDataToByteCodeObjects(data.getByteCodeObjects()));
         thriftStruct.setHashState(data.getHashState());
-        thriftStruct.setTokenStandart(tokenStandartDataToTokenStandart(data.getTokenStandardData()));
+        thriftStruct.setTokenStandard(data.getTokenStandardId());
         return thriftStruct;
     }
 
@@ -130,8 +130,7 @@ public class NodePojoConverter {
 
     public static SmartContractDeployData createSmartContractDeployData(SmartContractDeploy thriftStruct) {
         return new SmartContractDeployData(thriftStruct.getSourceCode(),
-            GeneralConverter.byteCodeObjectsToByteCodeObjectsData(thriftStruct.getByteCodeObjects()),
-            tokenStandartToTokenStandartData(thriftStruct.getTokenStandart()));
+            GeneralConverter.byteCodeObjectsToByteCodeObjectsData(thriftStruct.getByteCodeObjects()), thriftStruct.getTokenStandard());
     }
 
     public static SmartTransInfoData createSmartTransInfoData(SmartTransInfo thriftStruct) {
@@ -184,29 +183,13 @@ public class NodePojoConverter {
     }
 
     public static TokenDeployTransInfoData createTokenDeployTransInfoData(TokenDeployTransInfo thriftStruct) {
-        return new TokenDeployTransInfoData(thriftStruct.getName(), thriftStruct.getCode(),
-            createTokenStandartData(thriftStruct.getStandart()));
+        return new TokenDeployTransInfoData(thriftStruct.getName(), thriftStruct.getCode(), thriftStruct.getTokenStandard());
     }
 
     public static TokenTransferTransInfoData createTokenTransferTransInfoData(TokenTransferTransInfo thriftStruct) {
         return new TokenTransferTransInfoData(thriftStruct.getCode(), thriftStruct.getSender(),
             thriftStruct.getReceiver(), thriftStruct.getAmount());
     }
-
-
-    public static TokenStandartData createTokenStandartData(TokenStandart thriftStruct) {
-        switch (thriftStruct) {
-            case CreditsBasic:
-                return TokenStandartData.CreditsBasic;
-            case CreditsExtended:
-                return TokenStandartData.CreditsExtended;
-            case NotAToken:
-                return TokenStandartData.NotAToken;
-            default:
-                throw new ConverterException(String.format("Unsupported value: %s", thriftStruct.getValue()));
-        }
-    }
-
 
     public static TransactionIdData createTransactionIdData(TransactionId thriftStruct) {
         return new TransactionIdData(thriftStruct.getPoolHash(), thriftStruct.getIndex());
@@ -310,28 +293,28 @@ public class NodePojoConverter {
         return wideTransactionId & maskForZeroingFirstTwoBit;
     }
 
-    public static TokenStandart tokenStandartDataToTokenStandart(TokenStandartData tokenStardartData) {
-        if (tokenStardartData.equals(TokenStandartData.NotAToken)) {
+    public static TokenStandart tokenStandartDataToTokenStandart(TokenStandardData tokenStardartData) {
+        if (tokenStardartData.equals(TokenStandardData.NOT_A_TOKEN)) {
             return TokenStandart.NotAToken;
         }
-        if (tokenStardartData.equals(TokenStandartData.CreditsBasic)) {
+        if (tokenStardartData.equals(TokenStandardData.BASIC_STANDARD)) {
             return TokenStandart.CreditsBasic;
         }
-        if (tokenStardartData.equals(TokenStandartData.CreditsExtended)) {
+        if (tokenStardartData.equals(TokenStandardData.EXTENSION_STANDARD)) {
             return TokenStandart.CreditsExtended;
         }
-        throw new ConverterException(String.format("Unsupported value: %s", tokenStardartData.getValue()));
+        throw new ConverterException(String.format("Unsupported value: %s", tokenStardartData.getId()));
     }
 
-    public static TokenStandartData tokenStandartToTokenStandartData(TokenStandart tokenStardart) {
+    public static TokenStandardData tokenStandartToTokenStandartData(TokenStandart tokenStardart) {
         if (tokenStardart.equals(TokenStandart.NotAToken)) {
-            return TokenStandartData.NotAToken;
+            return TokenStandardData.NOT_A_TOKEN;
         }
         if (tokenStardart.equals(TokenStandart.CreditsBasic)) {
-            return TokenStandartData.CreditsBasic;
+            return TokenStandardData.BASIC_STANDARD;
         }
         if (tokenStardart.equals(TokenStandart.CreditsExtended)) {
-            return TokenStandartData.CreditsExtended;
+            return TokenStandardData.EXTENSION_STANDARD;
         }
         throw new ConverterException(String.format("Unsupported value: %s", tokenStardart.getValue()));
     }

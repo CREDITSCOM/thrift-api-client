@@ -2,7 +2,7 @@ package com.credits.client.tests.util;
 
 import com.credits.client.node.pojo.SmartContractData;
 import com.credits.client.node.pojo.SmartContractDeployData;
-import com.credits.client.node.pojo.TokenStandartData;
+import com.credits.client.node.pojo.TokenStandardData;
 import com.credits.client.node.util.ObjectKeeper;
 import org.junit.After;
 import org.junit.Assert;
@@ -28,7 +28,7 @@ public class ObjectKeeperTest {
     public void setUp() throws IOException {
         objectKeeper = new ObjectKeeper<>(account, "obj");
         deleteCacheDirectory();
-        SmartContractDeployData smartContractDeployData = new SmartContractDeployData("aaa", null, TokenStandartData.CreditsBasic);
+        SmartContractDeployData smartContractDeployData = new SmartContractDeployData("aaa", null, TokenStandardData.BASIC_STANDARD.getId());
         someData.put("1",new SmartContractData(null, null, smartContractDeployData,null, null));
     }
 
@@ -57,7 +57,7 @@ public class ObjectKeeperTest {
                 @Override
                 public HashMap<String, SmartContractData> modify(HashMap<String, SmartContractData> keptObject) {
                     if (keptObject != null) {
-                        SmartContractDeployData smartContractDeployData = new SmartContractDeployData("BBB", null, TokenStandartData.CreditsBasic);
+                        SmartContractDeployData smartContractDeployData = new SmartContractDeployData("BBB", null, TokenStandardData.BASIC_STANDARD.getId());
                         keptObject.put("2", new SmartContractData(null, null, smartContractDeployData, null, null));
                     }
                     return keptObject;
@@ -70,7 +70,7 @@ public class ObjectKeeperTest {
     public void usingSerializedObject(){
         objectKeeper.keepObject(someData);
         HashMap<String, SmartContractData> restoredObject = objectKeeper.getKeptObject().get();
-        SmartContractDeployData smartContractDeployData = new SmartContractDeployData("BBB", null, TokenStandartData.CreditsBasic);
+        SmartContractDeployData smartContractDeployData = new SmartContractDeployData("BBB", null, TokenStandardData.BASIC_STANDARD.getId());
         restoredObject.put("2", new SmartContractData(null, null, smartContractDeployData, null, null));
         objectKeeper.keepObject(restoredObject);
         restoredObject = objectKeeper.getKeptObject().get();

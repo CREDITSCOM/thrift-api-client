@@ -37,10 +37,6 @@ public abstract class SmartTransInfoData implements Serializable {
         return (SmartStateTransInfoData)this;
     }
 
-    public TokenDeployTransInfoData getTokenDeployTransInfoData() {
-        return (TokenDeployTransInfoData)this;
-    }
-
     public TokenTransferTransInfoData getTokenTransferTransInfoData() {
         return (TokenTransferTransInfoData)this;
     }

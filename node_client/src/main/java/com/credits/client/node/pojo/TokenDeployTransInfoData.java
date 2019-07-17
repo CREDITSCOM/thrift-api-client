@@ -1,14 +1,17 @@
 package com.credits.client.node.pojo;
 
+import java.util.Objects;
+
 public class TokenDeployTransInfoData extends SmartTransInfoData {
     public String name;
     public String code;
-    public TokenStandartData standart;
 
-    public TokenDeployTransInfoData(String name, String code, TokenStandartData standart) {
+    public long tokenStandard;
+
+    public TokenDeployTransInfoData(String name, String code, long tokenStandard) {
         this.name = name;
         this.code = code;
-        this.standart = standart;
+        this.tokenStandard = tokenStandard;
     }
 
     public String getName() {
@@ -27,32 +30,27 @@ public class TokenDeployTransInfoData extends SmartTransInfoData {
         this.code = code;
     }
 
-    public TokenStandartData getStandart() {
-        return standart;
+    public long getTokenStandard() {
+        return tokenStandard;
     }
 
-    public void setStandart(TokenStandartData standart) {
-        this.standart = standart;
+    public void setTokenStandard(long tokenStandard) {
+        this.tokenStandard = tokenStandard;
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof TokenDeployTransInfoData)) return false;
-
+        if (o == null || getClass() != o.getClass()) return false;
         TokenDeployTransInfoData that = (TokenDeployTransInfoData) o;
-
-        if (!getName().equals(that.getName())) return false;
-        if (!getCode().equals(that.getCode())) return false;
-        return getStandart() == that.getStandart();
+        return tokenStandard == that.tokenStandard &&
+                Objects.equals(name, that.name) &&
+                Objects.equals(code, that.code);
     }
 
     @Override
     public int hashCode() {
-        int result = getName().hashCode();
-        result = 31 * result + getCode().hashCode();
-        result = 31 * result + getStandart().hashCode();
-        return result;
+        return Objects.hash(name, code, tokenStandard);
     }
 
     @Override
@@ -60,7 +58,7 @@ public class TokenDeployTransInfoData extends SmartTransInfoData {
         return "TokenDeployTransInfoData{" +
                 "name='" + name + '\'' +
                 ", code='" + code + '\'' +
-                ", standart=" + standart +
+                ", tokenStandard=" + tokenStandard +
                 '}';
     }
 }
