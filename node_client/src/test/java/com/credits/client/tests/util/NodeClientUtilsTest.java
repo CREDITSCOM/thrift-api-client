@@ -3,7 +3,6 @@ package com.credits.client.tests.util;
 import com.credits.client.node.exception.NodeClientException;
 import com.credits.client.node.pojo.SmartContractData;
 import com.credits.client.node.pojo.SmartContractDeployData;
-import com.credits.client.node.pojo.TokenStandardData;
 import com.credits.client.node.util.NodeClientUtils;
 import com.credits.general.util.GeneralConverter;
 import org.junit.Assert;
@@ -17,7 +16,7 @@ public class NodeClientUtilsTest {
 
     @Test
     public void serializeByThriftTest01() throws NodeClientException {
-        SmartContractDeployData smartContractDeployData = new SmartContractDeployData("sourceCode", null, TokenStandardData.BASIC_STANDARD.getId());
+        SmartContractDeployData smartContractDeployData = new SmartContractDeployData("sourceCode", null, 1);
         SmartContractData smartContractData = new SmartContractData(
             "address".getBytes(),
             "deployer".getBytes(),

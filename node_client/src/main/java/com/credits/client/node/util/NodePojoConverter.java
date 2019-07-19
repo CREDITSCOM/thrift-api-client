@@ -293,32 +293,6 @@ public class NodePojoConverter {
         return wideTransactionId & maskForZeroingFirstTwoBit;
     }
 
-    public static TokenStandart tokenStandartDataToTokenStandart(TokenStandardData tokenStardartData) {
-        if (tokenStardartData.equals(TokenStandardData.NOT_A_TOKEN)) {
-            return TokenStandart.NotAToken;
-        }
-        if (tokenStardartData.equals(TokenStandardData.BASIC_STANDARD)) {
-            return TokenStandart.CreditsBasic;
-        }
-        if (tokenStardartData.equals(TokenStandardData.EXTENSION_STANDARD)) {
-            return TokenStandart.CreditsExtended;
-        }
-        throw new ConverterException(String.format("Unsupported value: %s", tokenStardartData.getId()));
-    }
-
-    public static TokenStandardData tokenStandartToTokenStandartData(TokenStandart tokenStardart) {
-        if (tokenStardart.equals(TokenStandart.NotAToken)) {
-            return TokenStandardData.NOT_A_TOKEN;
-        }
-        if (tokenStardart.equals(TokenStandart.CreditsBasic)) {
-            return TokenStandardData.BASIC_STANDARD;
-        }
-        if (tokenStardart.equals(TokenStandart.CreditsExtended)) {
-            return TokenStandardData.EXTENSION_STANDARD;
-        }
-        throw new ConverterException(String.format("Unsupported value: %s", tokenStardart.getValue()));
-    }
-
     public static TransactionState transactionStateDataToTransactionState(TransactionStateData transactionStateData) {
         if (transactionStateData.equals(TransactionStateData.INVALID)) {
             return TransactionState.INVALID;
