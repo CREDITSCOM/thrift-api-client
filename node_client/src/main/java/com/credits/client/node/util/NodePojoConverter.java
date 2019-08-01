@@ -10,7 +10,9 @@ import org.apache.commons.codec.binary.Hex;
 
 import java.math.BigDecimal;
 import java.nio.ByteBuffer;
+import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.credits.client.node.pojo.SmartContractInvocationData.SMART_CONTRACT_INVOCATION_VERSION;
@@ -62,6 +64,7 @@ public class NodePojoConverter {
             data.setSmartInfo(createSmartTransInfoData(transaction.getSmartInfo()));
         }
         data.setType(createTransactionTypeData(transaction.getType()));
+        data.setUsedContracts(transaction.getUsedContracts());
         return data;
     }
 
@@ -79,6 +82,7 @@ public class NodePojoConverter {
         data.setTarget(transaction.getTarget());
         data.setCommentBytes(transaction.getUserFields());
         data.setType(TransactionTypeData.TT_Normal);
+        data.setUsedContracts(transaction.getUsedContracts());
         return data;
     }
 

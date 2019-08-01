@@ -97,7 +97,8 @@ public class NodeClientTestIT {
                 new BigDecimal("0.123"),
                 (short) 10,
                 null,
-                null
+                null,
+                    null
                 );
         transactionFlowData.setSignature("signature".getBytes());
         ApiResponseData responseData = nodeService.transactionFlow(transactionFlowData);
@@ -134,7 +135,7 @@ public class NodeClientTestIT {
 
         SmartContractDeployData smartContractDeployData = new SmartContractDeployData("sourceCode", null, 1);
         SmartContractInvocationData scData = new SmartContractInvocationData(smartContractDeployData, "method", null, null, true);
-        TransactionFlowData transactionData = new TransactionFlowData(transactionId, decodeFromBASE58(source), decodeFromBASE58(target), new BigDecimal(1), (short) 0x001,null, null);
+        TransactionFlowData transactionData = new TransactionFlowData(transactionId, decodeFromBASE58(source), decodeFromBASE58(target), new BigDecimal(1), (short) 0x001,null, null, null);
         SmartContractTransactionFlowData smartContractFlowData = new SmartContractTransactionFlowData(transactionData,scData);
 
         async(() -> nodeService.smartContractTransactionFlow(smartContractFlowData), new Callback<ApiResponseData>() {

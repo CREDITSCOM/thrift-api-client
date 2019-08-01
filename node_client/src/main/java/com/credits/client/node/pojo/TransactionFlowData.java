@@ -2,7 +2,9 @@ package com.credits.client.node.pojo;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 
@@ -16,7 +18,7 @@ public class TransactionFlowData extends TransactionData implements Serializable
     }
 
     public TransactionFlowData(long innerId, byte[] source, byte[] target, BigDecimal amount, Short offeredMaxFee16Bits,
-        byte[] smartContractBytes, byte[] commentBytes) {
+                               byte[] smartContractBytes, byte[] commentBytes, List<ByteBuffer> usedContracts) {
         super();
         this.setId(innerId);
         this.setSource(source);
@@ -26,26 +28,22 @@ public class TransactionFlowData extends TransactionData implements Serializable
         this.setOfferedMaxFee16Bits(offeredMaxFee16Bits);
         this.setSmartContractBytes(smartContractBytes);
         this.setCommentBytes(commentBytes);
+        this.setUsedContracts(usedContracts);
     }
 
     public TransactionFlowData(long innerId, byte[] source, byte[] target, BigDecimal amount, Short offeredMaxFee16Bits,
-        byte currency, byte[] smartContractBytes, byte[] commentBytes, byte[] signature) {
-        super();
-        this.setId(innerId);
-        this.setSource(source);
-        this.setTarget(target);
-        this.setAmount(amount);
+        byte currency, byte[] smartContractBytes, byte[] commentBytes, List<ByteBuffer> usedContracts, byte[] signature) {
+        this(innerId, source, target, amount, offeredMaxFee16Bits, smartContractBytes, commentBytes, usedContracts);
         this.setCurrency(currency);
-        this.setOfferedMaxFee16Bits(offeredMaxFee16Bits);
-        this.setSmartContractBytes(smartContractBytes);
-        this.setCommentBytes(commentBytes);
+        this.setUsedContracts(usedContracts);
         this.setSignature(signature);
     }
 
 
     public TransactionFlowData(TransactionFlowData transaction) {
         this(transaction.id, transaction.source, transaction.target, transaction.amount, transaction.offeredMaxFee16Bits,
-            transaction.currency, transaction.smartContractBytes, transaction.commentBytes, transaction.signature);
+            transaction.currency, transaction.smartContractBytes, transaction.commentBytes, transaction.getUsedContracts(),
+            transaction.signature);
     }
 
     public Short getOfferedMaxFee16Bits() {

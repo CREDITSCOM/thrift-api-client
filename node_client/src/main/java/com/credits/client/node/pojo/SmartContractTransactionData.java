@@ -14,6 +14,7 @@ public class SmartContractTransactionData extends TransactionData implements Ser
         this.setBlockId(transactionData.getBlockId());
         this.setMethod(transactionData.getMethod());
         this.setParams(transactionData.getParams());
+        this.setUsedContracts(transactionData.getUsedContracts());
         this.smartContractData = smartContractData;
     }
 

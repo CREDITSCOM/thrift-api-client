@@ -4,6 +4,7 @@ import com.credits.general.thrift.generated.Variant;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.List;
 
@@ -21,6 +22,7 @@ public class TransactionData implements Serializable {
     protected List<Variant> params;
     protected TransactionTypeData type;
     protected SmartTransInfoData smartInfo;
+    protected List<ByteBuffer> usedContracts;
 
 
 
@@ -121,6 +123,15 @@ public class TransactionData implements Serializable {
     public void setSmartInfo(SmartTransInfoData smartInfo) {
         this.smartInfo = smartInfo;
     }
+
+    public List<ByteBuffer> getUsedContracts() {
+        return usedContracts;
+    }
+
+    public void setUsedContracts(List<ByteBuffer> usedContracts) {
+        this.usedContracts = usedContracts;
+    }
+
 //      TODO спросить у Игоря
 //    @Override
 //    public boolean equals(Object o) {
@@ -144,7 +155,6 @@ public class TransactionData implements Serializable {
 //        return result;
 //    }
 
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -162,6 +172,7 @@ public class TransactionData implements Serializable {
         if (getMethod() != null ? !getMethod().equals(that.getMethod()) : that.getMethod() != null) return false;
         if (getParams() != null ? !getParams().equals(that.getParams()) : that.getParams() != null) return false;
         if (getType() != that.getType()) return false;
+        if (getUsedContracts() != null ? !getUsedContracts().equals(that.getUsedContracts()) : that.getUsedContracts() != null) return false;
         return getSmartInfo() != null ? getSmartInfo().equals(that.getSmartInfo()) : that.getSmartInfo() == null;
     }
 
@@ -178,6 +189,7 @@ public class TransactionData implements Serializable {
         result = 31 * result + (getParams() != null ? getParams().hashCode() : 0);
         result = 31 * result + (getType() != null ? getType().hashCode() : 0);
         result = 31 * result + (getSmartInfo() != null ? getSmartInfo().hashCode() : 0);
+        result = 31 * result + (getUsedContracts() != null ? getUsedContracts().hashCode() : 0);
         return result;
     }
 
@@ -208,6 +220,7 @@ public class TransactionData implements Serializable {
                 ", params=" + params +
                 ", type=" + type +
                 ", smartInfo=" + smartInfo +
+                ", usedContracts=" + usedContracts +
                 '}';
     }
 }
