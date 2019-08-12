@@ -11,7 +11,7 @@ public class Serializer {
         Object instance;
         requireNonNull(contractState, "executor state can't be null");
         try (ObjectInputStream ous = new ObjectInputStreamWithClassLoader(new ByteArrayInputStream(contractState), classLoader)) {
-            instance = ous.readObject();
+            instance = ous.readUnshared();
         } catch (IOException | ClassNotFoundException e) {
             throw new RuntimeException("cannot getObject smart executor instance. " + e);
         }
@@ -22,7 +22,7 @@ public class Serializer {
         requireNonNull(instance, "instance can't be null");
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try (ObjectOutputStream ous = new ObjectOutputStream(baos)) {
-            ous.writeObject(instance);
+            ous.writeUnshared(instance);
         } catch (IOException e) {
             throw new RuntimeException("Cannot serialize smart executor instance. " + e);
         }
