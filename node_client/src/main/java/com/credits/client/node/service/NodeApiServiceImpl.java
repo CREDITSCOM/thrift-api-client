@@ -17,7 +17,6 @@ import org.slf4j.LoggerFactory;
 import java.math.BigDecimal;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
@@ -136,16 +135,15 @@ public class NodeApiServiceImpl implements NodeApiService {
     }
 
     @Override
-    public PoolData getPoolInfo(byte[] hash, long index) throws NodeClientException {
+    public PoolData getPoolInfo(long poolSequence, long index) throws NodeClientException {
         LOGGER.info(String.format("getPoolInfo: ---> index = %d", index));
-        ByteBuffer hashByteBuffer = byteArrayToByteBuffer(hash);
 
-        PoolInfoGetResult result = nodeClient.getPoolInfo(hashByteBuffer, index);
+        PoolInfoGetResult result = nodeClient.getPoolInfo(poolSequence, index);
         processApiResponse(result.getStatus());
 
         if (!result.isIsFound()) {
             throw new NodeClientException(
-                    String.format("Pool by hash %s and index %s is not found", Arrays.toString(hash), index));
+                    String.format("Pool by sequence %s and index %s is not found", poolSequence, index));
         }
         PoolData poolData = poolToPoolData(result.getPool());
         LOGGER.info(String.format("getPoolInfo: <--- index = %d", index));

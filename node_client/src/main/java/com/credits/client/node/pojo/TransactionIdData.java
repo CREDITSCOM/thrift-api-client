@@ -6,22 +6,22 @@ import java.io.Serializable;
 public class TransactionIdData implements Serializable {
 
     private static final long serialVersionUID = -4240471143007475693L;
-    public byte[] poolHash;
+    public long poolHash;
     public int index;
 
     public TransactionIdData() {
     }
 
-    public TransactionIdData(byte[] poolHash, int index) {
-        this.poolHash = poolHash;
+    public TransactionIdData(long poolSequence, int index) {
+        this.poolHash = poolSequence;
         this.index = index;
     }
 
-    public byte[] getPoolHash() {
+    public long getPoolSequence() {
         return poolHash;
     }
 
-    public void setPoolHash(byte[] poolHash) {
+    public void setPoolHash(long poolHash) {
         this.poolHash = poolHash;
     }
 

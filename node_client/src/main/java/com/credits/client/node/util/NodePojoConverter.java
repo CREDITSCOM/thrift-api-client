@@ -6,17 +6,15 @@ import com.credits.client.node.thrift.generated.*;
 import com.credits.general.thrift.generated.Amount;
 import com.credits.general.util.GeneralConverter;
 import com.credits.general.util.exception.ConverterException;
-import org.apache.commons.codec.binary.Hex;
 
 import java.math.BigDecimal;
 import java.nio.ByteBuffer;
-import java.util.List;
 import java.util.Locale;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.credits.client.node.pojo.SmartContractInvocationData.SMART_CONTRACT_INVOCATION_VERSION;
-import static com.credits.general.util.GeneralConverter.*;
+import static com.credits.general.util.GeneralConverter.amountToBigDecimal;
+import static com.credits.general.util.GeneralConverter.bigDecimalToAmount;
 import static com.credits.general.util.GeneralPojoConverter.createApiResponseData;
 
 
@@ -49,7 +47,7 @@ public class NodePojoConverter {
 
         TransactionData data = new TransactionData();
         Long innerId = transaction.getId();
-        data.setBlockId(Hex.encodeHexString(blockTransactionId.getPoolHash()) + "." + blockTransactionId.getIndex());
+        data.setBlockId(blockTransactionId.getPoolSeq() + "." + blockTransactionId.getIndex());
         data.setAmount(amountToBigDecimal(transaction.getAmount()));
         data.setCurrency(transaction.getCurrency());
         data.setId(innerId);
@@ -196,7 +194,7 @@ public class NodePojoConverter {
     }
 
     public static TransactionIdData createTransactionIdData(TransactionId thriftStruct) {
-        return new TransactionIdData(thriftStruct.getPoolHash(), thriftStruct.getIndex());
+        return new TransactionIdData(thriftStruct.getPoolSeq(), thriftStruct.getIndex());
     }
 
     public static SmartOperationStateData createSmartOperationStateData(SmartOperationState thriftStruct) {
@@ -287,7 +285,7 @@ public class NodePojoConverter {
 
     public static TransactionId transactionIdDataToTransactionId(TransactionIdData transactionIdData) {
         TransactionId transactionId = new TransactionId();
-        transactionId.setPoolHash(byteArrayToByteBuffer(transactionIdData.getPoolHash()));
+        transactionId.setPoolSeq(transactionIdData.getPoolSequence());
         transactionId.setIndex(transactionIdData.getIndex());
         return transactionId;
     }

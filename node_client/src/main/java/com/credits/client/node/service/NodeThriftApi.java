@@ -2,20 +2,8 @@ package com.credits.client.node.service;
 
 import com.credits.client.node.exception.NodeClientException;
 import com.credits.client.node.pojo.TransactionIdData;
-import com.credits.client.node.thrift.generated.PoolInfoGetResult;
-import com.credits.client.node.thrift.generated.PoolListGetResult;
-import com.credits.client.node.thrift.generated.SmartContractAddressesListGetResult;
-import com.credits.client.node.thrift.generated.SmartContractGetResult;
-import com.credits.client.node.thrift.generated.SmartContractsListGetResult;
-import com.credits.client.node.thrift.generated.TransactionGetResult;
-import com.credits.client.node.thrift.generated.TransactionsGetResult;
-import com.credits.client.node.thrift.generated.TransactionsStateGetResult;
-import com.credits.client.node.thrift.generated.WalletBalanceGetResult;
-import com.credits.client.node.thrift.generated.WalletDataGetResult;
-import com.credits.client.node.thrift.generated.WalletIdGetResult;
-import com.credits.client.node.thrift.generated.WalletTransactionsCountGetResult;
+import com.credits.client.node.thrift.generated.*;
 
-import java.nio.ByteBuffer;
 import java.util.List;
 
 interface NodeThriftApi {
@@ -23,7 +11,7 @@ interface NodeThriftApi {
 
     TransactionGetResult getTransaction(TransactionIdData transactionIdData) throws NodeClientException;
 
-    PoolInfoGetResult getPoolInfo(ByteBuffer hashByteBuffer, long index) throws NodeClientException;
+    PoolInfoGetResult getPoolInfo(long poolSequence, long index) throws NodeClientException;
 
     PoolListGetResult getPoolList(Long offset, Long limit) throws NodeClientException;
 
