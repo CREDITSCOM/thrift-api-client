@@ -22,8 +22,6 @@ class ObjectInputStreamWithClassLoader extends ObjectInputStream {
         throws ClassNotFoundException
     {
         String name = desc.getName();
-        Class<?> clazz =  Class.forName(name, false, this.customLoader);
-        customLoader = null;
-        return clazz;
+        return Class.forName(name, false, this.customLoader);
     }
 }
