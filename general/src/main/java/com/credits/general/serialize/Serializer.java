@@ -13,7 +13,7 @@ public class Serializer {
         try (ObjectInputStream ous = new ObjectInputStreamWithClassLoader(new ByteArrayInputStream(contractState), classLoader)) {
             instance = ous.readUnshared();
         } catch (IOException | ClassNotFoundException e) {
-            throw new RuntimeException("cannot getObject smart executor instance. " + e);
+            throw new RuntimeException("cannot deserialize smart contract instance. " + e);
         }
         return Optional.ofNullable(instance).orElseThrow(() -> new RuntimeException("cannot deserialize object. Object size = " + contractState.length));
     }
@@ -24,7 +24,7 @@ public class Serializer {
         try (ObjectOutputStream ous = new ObjectOutputStream(baos)) {
             ous.writeUnshared(instance);
         } catch (IOException e) {
-            throw new RuntimeException("Cannot serialize smart executor instance. " + e);
+            throw new RuntimeException("cannot serialize smart contract instance. " + e);
         }
         return baos.toByteArray();
     }
