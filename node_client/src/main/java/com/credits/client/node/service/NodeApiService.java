@@ -2,16 +2,7 @@ package com.credits.client.node.service;
 
 
 import com.credits.client.node.exception.NodeClientException;
-import com.credits.client.node.pojo.PoolData;
-import com.credits.client.node.pojo.SmartContractData;
-import com.credits.client.node.pojo.SmartContractTransactionData;
-import com.credits.client.node.pojo.SmartContractTransactionFlowData;
-import com.credits.client.node.pojo.TransactionData;
-import com.credits.client.node.pojo.TransactionFlowData;
-import com.credits.client.node.pojo.TransactionFlowResultData;
-import com.credits.client.node.pojo.TransactionIdData;
-import com.credits.client.node.pojo.TransactionsStateGetResultData;
-import com.credits.client.node.pojo.WalletData;
+import com.credits.client.node.pojo.*;
 import com.credits.general.util.exception.ConverterException;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -32,7 +23,7 @@ public interface NodeApiService {
 
     TransactionData getTransaction(TransactionIdData transactionIdData) throws NodeClientException;
 
-    PoolData getPoolInfo(byte[] hash, long index) throws NodeClientException;
+    PoolData getPoolInfo(long poolSequence, long index) throws NodeClientException;
 
     List<PoolData> getPoolList(Long offset, Long limit) throws NodeClientException;
 

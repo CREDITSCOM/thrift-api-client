@@ -51,9 +51,9 @@ public class NodeThriftApiClient implements NodeThriftApi {
         return callThrift(client, () -> client.TransactionGet(NodePojoConverter.transactionIdDataToTransactionId(transactionIdData)));
     }
 
-    public PoolInfoGetResult getPoolInfo(ByteBuffer hashByteBuffer, long index) throws NodeClientException {
+    public PoolInfoGetResult getPoolInfo(long poolSequence, long index) throws NodeClientException {
         API.Client client = pool.getResource();
-        return callThrift(client, () -> client.PoolInfoGet(hashByteBuffer, index));
+        return callThrift(client, () -> client.PoolInfoGet(poolSequence, index));
     }
 
     public PoolListGetResult getPoolList(Long offset, Long limit) throws NodeClientException {

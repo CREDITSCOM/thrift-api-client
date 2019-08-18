@@ -83,7 +83,7 @@ public class NodeClientTestIT {
 
     @Test
     public void getTransactionTest() throws NodeClientException {
-        TransactionData transactionData = nodeService.getTransaction(new TransactionIdData("qwerty".getBytes(), 1));
+        TransactionData transactionData = nodeService.getTransaction(new TransactionIdData(0, 1));
         LOGGER.info("transactionData = {}", transactionData);
     }
 
