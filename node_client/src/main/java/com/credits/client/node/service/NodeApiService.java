@@ -43,5 +43,6 @@ public interface NodeApiService {
 
     Long getWalletTransactionsCount(String address) throws NodeClientException, ConverterException;
 
+    @Deprecated
     TransactionsStateGetResultData getTransactionsState(String address, List<Long> transactionIdList) throws NodeClientException, ConverterException;
 }

@@ -29,5 +29,6 @@ interface NodeThriftApi {
 
     WalletTransactionsCountGetResult getWalletTransactionsCount(byte[] address) throws NodeClientException;
 
+    @Deprecated
     TransactionsStateGetResult getTransactionsState(byte[] address, List<Long> transactionIdList) throws NodeClientException;
 }

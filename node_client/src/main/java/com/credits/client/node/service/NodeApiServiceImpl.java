@@ -272,6 +272,7 @@ public class NodeApiServiceImpl implements NodeApiService {
     }
 
     @Override
+    @Deprecated
     public TransactionsStateGetResultData getTransactionsState(String address, List<Long> transactionIdList)
     throws NodeClientException, ConverterException {
         TransactionsStateGetResult transactionsStateGetResult =

@@ -106,6 +106,7 @@ public class NodeThriftApiClient implements NodeThriftApi {
         return callThrift(client, () -> client.TransactionFlow(transaction));
     }
 
+    @Deprecated
     public TransactionsStateGetResult getTransactionsState(byte[] address, List<Long> transactionIdList) throws NodeClientException {
         API.Client client = pool.getResource();
         return callThrift(client, () -> client.TransactionsStateGet(ByteBuffer.wrap(address),transactionIdList));
