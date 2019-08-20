@@ -21,6 +21,7 @@ public class ThriftClientPool<T extends TServiceClient> implements
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ThriftClientPool.class);
     public static final int SOCKET_TIMEOUT = 1200000;
+    public static final int CONNECTION_TIMEOUT = 60000;
 
     private final GenericObjectPool<T> internalPool;
 
@@ -97,7 +98,7 @@ public class ThriftClientPool<T extends TServiceClient> implements
         }
 
         public TProtocol make() {
-            TTransport transport = new TSocket(host, port, SOCKET_TIMEOUT);
+            TTransport transport = new TSocket(host, port, SOCKET_TIMEOUT, CONNECTION_TIMEOUT);
             try {
                 transport.open();
             } catch (TTransportException e) {
