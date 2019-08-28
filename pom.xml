@@ -6,7 +6,7 @@
     <groupId>com.credits.client</groupId>
     <artifactId>api-client</artifactId>
     <packaging>pom</packaging>
-    <version>1.2</version>
+    <version>none</version>
 
     <name>API-client</name>
 

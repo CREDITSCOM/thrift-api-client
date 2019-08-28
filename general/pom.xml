@@ -9,7 +9,7 @@
     <parent>
         <artifactId>api-client</artifactId>
         <groupId>com.credits.client</groupId>
-        <version>1.2</version>
+        <version>none</version>
     </parent>
 
     <build>

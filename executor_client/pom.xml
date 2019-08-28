@@ -10,7 +10,7 @@
     <parent>
         <artifactId>api-client</artifactId>
         <groupId>com.credits.client</groupId>
-        <version>1.2</version>
+        <version>none</version>
     </parent>
 
     <build>
@@ -27,7 +27,7 @@
         <dependency>
             <groupId>com.credits.client</groupId>
             <artifactId>node_client</artifactId>
-            <version>1.3</version>
+            <version>1.4</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>
