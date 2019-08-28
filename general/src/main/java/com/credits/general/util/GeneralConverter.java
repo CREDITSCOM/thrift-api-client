@@ -318,19 +318,20 @@ public class GeneralConverter {
         return null;
     }
 
-    public static Double toDouble(Object value, Locale locale, String doubleFormat) throws ConverterException {
+    public static Double toDouble(Object value, Locale locale) throws ConverterException {
         if (value == null) {
             return null;
         }
         if (value instanceof String) {
-            NumberFormat nf = NumberFormat.getNumberInstance(locale);
-            DecimalFormat df = (DecimalFormat) nf;
-            df.applyPattern(doubleFormat);
+
+            NumberFormat format = NumberFormat.getInstance(locale);
+            Number number = null;
             try {
-                return (Double) df.parse((String) value);
+                number = format.parse((String)value);
             } catch (ParseException e) {
                 throw new ConverterException(e);
             }
+            return number.doubleValue();
         }
         return null;
     }
@@ -341,7 +342,7 @@ public class GeneralConverter {
         }
 
         if (value instanceof String) {
-            DecimalFormat nf = (DecimalFormat) NumberFormat.getInstance(Locale.getDefault());
+            DecimalFormat nf = (DecimalFormat) NumberFormat.getInstance(Constants.LOCALE);
             nf.setParseBigDecimal(true);
             try {
                 return (BigDecimal) nf.parseObject((String) value);

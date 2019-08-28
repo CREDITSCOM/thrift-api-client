@@ -162,7 +162,7 @@ public class GeneralConverterTest {
     @Test
     public void toDoubleTest02() {
         String value = "1" + DECIMAL_SEPARATOR + "2";
-        Assert.assertEquals(GeneralConverter.toDouble(value, Constants.LOCALE, GeneralConverter.DOUBLE_FORMAT), (Double) 1.2D);
+        Assert.assertEquals(GeneralConverter.toDouble(value, Constants.LOCALE), (Double) 1.2D);
     }
 
     @Test
@@ -173,12 +173,12 @@ public class GeneralConverterTest {
 
     @Test
     public void bigDecimalToAmountTest1() {
-        String valueAsString = "1.1111111111111";
+        String valueAsString = "1" + DECIMAL_SEPARATOR + "1111111111111";
         BigDecimal value = toBigDecimal(valueAsString);
         Amount amount = bigDecimalToAmount(value);
         Assert.assertEquals(amount.getIntegral(), 1);
         Assert.assertEquals(amount.getFraction(), 111111111111100000L);
-        valueAsString = "10.0";
+        valueAsString = "10" + DECIMAL_SEPARATOR + "0";
         value = toBigDecimal(valueAsString);
         amount = bigDecimalToAmount(value);
         Assert.assertEquals(amount.getIntegral(), 10);
@@ -187,7 +187,7 @@ public class GeneralConverterTest {
 
     @Test
     public void bigDecimalToAmountTest2() {
-        String valueAsString = "0.1000000000000000055511151231257827021181583404541015625" ;
+        String valueAsString = "0" + DECIMAL_SEPARATOR + "1000000000000000055511151231257827021181583404541015625" ;
         BigDecimal value;
         value = toBigDecimal(valueAsString);
         Amount amount = bigDecimalToAmount(value);
