@@ -92,7 +92,7 @@ public class VariantConverter {
                 final var amount = (Amount) object;
                 return new Variant(V_AMOUNT, new com.credits.general.thrift.generated.Amount(amount.getIntegral(), amount.getFractional()));
             } else if (object instanceof BigDecimal) {
-                return new Variant(V_BIG_DECIMAL, object.toString());
+                return new Variant(V_BIG_DECIMAL, ((BigDecimal) object).toPlainString());
             } else {
                 return new Variant(V_OBJECT, new object(classType, ByteBuffer.wrap(serialize(object))));
             }

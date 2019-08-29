@@ -161,4 +161,11 @@ public class VariantConverterTest {
         assertEquals(V_INT_BOX, variant.getV_array().get(0).getSetField());
         assertEquals(integersArray[0], convertedArray[0]);
     }
+
+    @Test
+    void bigDecimalToString() {
+        String value = "0.00000000000000000000000000000000000000000000000000000001";
+        Variant variantValue = VariantConverter.toVariant(BigDecimal.class.getTypeName(), new BigDecimal(value));
+        assertEquals(variantValue.getFieldValue(), value);
+    }
 }
