@@ -13,7 +13,7 @@
     </parent>
 
     <build>
-        <!--defaultGoal>install</defaultGoal-->
+        <defaultGoal>install</defaultGoal>
     </build>
 
     <repositories>
