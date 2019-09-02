@@ -30,10 +30,6 @@
             <name>Temporary Staging Repository</name>
             <url>file://${project.build.directory}/mvn-repo</url>
         </repository>
-        <!--site>
-            <id>${project.artifactId}-site</id>
-            <url>${project.baseUri}</url>
-        </site-->
     </distributionManagement>
 
     <build>
