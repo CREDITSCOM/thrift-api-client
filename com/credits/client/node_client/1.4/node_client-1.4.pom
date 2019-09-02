@@ -15,7 +15,6 @@
     <properties>
         <skipTests>false</skipTests>
     </properties>
-
     <build>
         <defaultGoal>install</defaultGoal>
         <plugins>
@@ -52,20 +51,8 @@
                     </includes>
                 </configuration>
             </plugin>
-
         </plugins>
     </build>
-
-    <repositories>
-        <repository>
-            <id>thrift-api-client-mvn-repo</id>
-            <url>https://raw.github.com/creditscom/thrift-api-client/mvn-repo/</url>
-            <snapshots>
-                <enabled>true</enabled>
-                <updatePolicy>always</updatePolicy>
-            </snapshots>
-        </repository>
-    </repositories>
 
     <dependencies>
         <dependency>
