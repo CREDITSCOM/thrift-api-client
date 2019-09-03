@@ -22,6 +22,7 @@
         <github.global.server>github</github.global.server>
         <github.owner>creditscom</github.owner>
         <github.project>thrift-api-client</github.project>
+        <repository.updatePolicy>never</repository.updatePolicy>
     </properties>
 
     <distributionManagement>
@@ -87,7 +88,7 @@
             <url>https://raw.github.com/creditscom/thrift-api-client/mvn-repo/</url>
             <snapshots>
                 <enabled>true</enabled>
-                <updatePolicy>always</updatePolicy>
+                <updatePolicy>${repository.updatePolicy}</updatePolicy>
             </snapshots>
         </repository>
     </repositories>
