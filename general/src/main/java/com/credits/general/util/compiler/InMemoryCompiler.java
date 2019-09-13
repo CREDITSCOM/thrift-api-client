@@ -27,6 +27,12 @@ import static java.util.Collections.singletonList;
  */
 public class InMemoryCompiler {
 
+    private String jdkPath;
+
+    public InMemoryCompiler(String jdkPath) {
+        this.jdkPath = jdkPath;
+    }
+
     /**
      * Compiles a single class.
      *
@@ -70,25 +76,10 @@ public class InMemoryCompiler {
 
         JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
         if (compiler == null) {
-            String jdkPath = this.loadJdkPathFromEnvironmentVariables();
             System.setProperty("java.home", jdkPath);
             compiler = ToolProvider.getSystemJavaCompiler();
         }
         return compiler;
-    }
-
-    public String loadJdkPathFromEnvironmentVariables() throws CompilationException {
-        if (SystemUtils.OS_NAME.toLowerCase().contains("win")) {
-            Pattern regexpJdkPath = Pattern.compile("jdk[\\d]\\.[\\d]\\.[\\d]([\\d._])");
-            String jdkBinPath = Arrays.stream(System.getenv("Path").split(";"))
-                .filter(it -> regexpJdkPath.matcher(it).find())
-                .findFirst()
-                .orElseThrow(() -> new CompilationException(
-                    "Cannot compile the file. The java compiler has not been found, Java Development Kit should be installed."));
-            return jdkBinPath.substring(0, jdkBinPath.length() - 4); // remove last 4 symbols "\bin"
-        } else {
-            return "";
-        }
     }
 
     String loadClasspath() throws UnsupportedEncodingException {
@@ -103,12 +94,12 @@ public class InMemoryCompiler {
     }
 
     @SuppressWarnings("unchecked")
-    public static CompilationPackage compileSourceCode(String sourceCode) throws CompilationException {
+    public CompilationPackage compileSourceCode(String sourceCode) throws CompilationException {
         Map<String, String> classesToCompile = new HashMap<>();
         String className = GeneralSourceCodeUtils.parseClassName(sourceCode);
         classesToCompile.put(className, sourceCode);
 
-        CompilationPackage compilationPackage = new InMemoryCompiler().compile(classesToCompile);
+        CompilationPackage compilationPackage = compile(classesToCompile);
 
         if (!compilationPackage.isCompilationStatusSuccess()) {
             DiagnosticCollector collector = compilationPackage.getCollector();

@@ -22,11 +22,9 @@ import static org.junit.Assert.assertNotNull;
 
 public class InMemoryCompilerTest {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(InMemoryCompilerTest.class);
-
     @Test
     public void compileTest01() {
-        InMemoryCompiler compiler = new InMemoryCompiler();
+        InMemoryCompiler compiler = new InMemoryCompiler("");
         CompilationPackage compilationPackage = null;
         try {
             String sourceCode =
@@ -53,17 +51,6 @@ public class InMemoryCompilerTest {
                 assertEquals(action.getLineNumber(), 3);
             });
         }
-
-    }
-
-    @Test
-    public void loadJdkPathFromEnvironmentVariablesTest() {
-        InMemoryCompiler compiler = new InMemoryCompiler();
-        final String path = compiler.loadJdkPathFromEnvironmentVariables();
-        if(SystemUtils.OS_NAME.toLowerCase().contains("windows")){
-            assertNotNull(path);
-        }
-        else assertEquals("", path);
 
     }
 }
