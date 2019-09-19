@@ -78,7 +78,12 @@ public class NodeThriftApiClient implements NodeThriftApi {
 
     public SmartContractsListGetResult getSmartContracts(byte[] address) throws NodeClientException {
         API.Client client = pool.getResource();
-        return callThrift(client, () -> client.SmartContractsListGet(ByteBuffer.wrap(address)));
+        return callThrift(client, () -> client.SmartContractsListGet(ByteBuffer.wrap(address), 0, 0));
+    }
+
+    public SmartContractsListGetResult getSmartContracts(byte[] address, long offset, long limit) throws NodeClientException {
+        API.Client client = pool.getResource();
+        return callThrift(client, () -> client.SmartContractsListGet(ByteBuffer.wrap(address), offset, limit));
     }
 
     public SmartContractAddressesListGetResult getSmartContractAddresses(byte[] address) throws NodeClientException {
