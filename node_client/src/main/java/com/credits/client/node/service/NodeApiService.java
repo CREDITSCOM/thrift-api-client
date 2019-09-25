@@ -18,6 +18,8 @@ public interface NodeApiService {
 
     List<TransactionData> getTransactions(String address, long offset, long limit) throws NodeClientException, ConverterException;
 
+    TransactionsAndAmountData getTransactionsAndAmount(String address, long offset, long limit) throws NodeClientException, ConverterException;
+
     List<SmartContractTransactionData> getSmartContractTransactions(String address, long offset, long limit)
             throws NodeClientException, ConverterException;
 

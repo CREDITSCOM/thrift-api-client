@@ -132,29 +132,6 @@ public class TransactionData implements Serializable {
         this.usedContracts = usedContracts;
     }
 
-//      TODO спросить у Игоря
-//    @Override
-//    public boolean equals(Object o) {
-//        if (this == o) {
-//            return true;
-//        }
-//        if (!(o instanceof TransactionData)) {
-//            return false;
-//        }
-//        TransactionData that = (TransactionData) o;
-//        return id == that.id && currency == that.currency && Arrays.equals(source, that.source) &&
-//            Arrays.equals(target, that.target) && Objects.equals(amount, that.amount);
-//    }
-//
-//    @Override
-//    public int hashCode() {
-//
-//        int result = Objects.hash(id, amount, currency);
-//        result = 31 * result + Arrays.hashCode(source);
-//        result = 31 * result + Arrays.hashCode(target);
-//        return result;
-//    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

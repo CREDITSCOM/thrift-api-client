@@ -91,17 +91,32 @@ public class NodeApiServiceImpl implements NodeApiService {
     @Override
     public List<TransactionData> getTransactions(String address, long offset, long limit)
     throws NodeClientException, ConverterException {
-        LOGGER.info(
-                String.format("getTransactions: ---> address = %s, offset = %d, limit = %d", address, offset, limit));
+        LOGGER.info(String.format("getTransactions: ---> address = %s, offset = %d, limit = %d", address, offset, limit));
         TransactionsGetResult result = nodeClient.getTransactions(decodeFromBASE58(address), offset, limit);
         processApiResponse(result.getStatus());
         List<TransactionData> transactionDataList = new ArrayList<>();
         for (SealedTransaction sealedTransaction : result.getTransactions()) {
             transactionDataList.add(createTransactionData(sealedTransaction));
         }
-        LOGGER.info(String.format("getTransactions: <--- address = %s, transactions count = %d", address,
-                                  transactionDataList.size()));
+        LOGGER.info(String.format("getTransactions: <--- address = %s, transactions count = %d", address, transactionDataList.size()));
         return transactionDataList;
+    }
+
+    @Override
+    public TransactionsAndAmountData getTransactionsAndAmount(String address, long offset, long limit)
+    throws NodeClientException, ConverterException {
+        LOGGER.info("getTransactionsAndAmount: ---> address = {}, offset = {}, limit = {}", address, offset, limit);
+        final var  result = nodeClient.getTransactions(decodeFromBASE58(address), offset, limit);
+        processApiResponse(result.getStatus());
+        final var amountTransactions = result.total_trxns_count;
+        final var transactionDataList = new ArrayList<TransactionData>();
+        for (SealedTransaction sealedTransaction : result.getTransactions()) {
+            transactionDataList.add(createTransactionData(sealedTransaction));
+        }
+        LOGGER.info("getTransactionsAndAmount: <--- address = {}, receivedTransactionsCount = {} amountTotalTransactions = {}",
+                                  address,
+                                  transactionDataList.size(), amountTransactions) ;
+        return new TransactionsAndAmountData(amountTransactions, transactionDataList);
     }
 
     @Override
@@ -283,6 +298,10 @@ public class NodeApiServiceImpl implements NodeApiService {
 
     public static <R> void async(Function<R> apiCall, Callback<R> callback) {
         CompletableFuture.supplyAsync(apiCall::apply, threadPool).whenComplete(handleCallback(callback));
+    }
+
+    public static <R> CompletableFuture<R> async(Function<R> apiCall) {
+        return CompletableFuture.supplyAsync(apiCall::apply, threadPool);
     }
 
     public static <R> BiConsumer<R, Throwable> handleCallback(Callback<R> callback) {
