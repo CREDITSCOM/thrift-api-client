@@ -45,7 +45,7 @@ public class SmartContractTransactionFlowData extends TransactionFlowData implem
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("SmartContractTransactionFlowData{");
-        sb.append(", id=").append(id);
+        sb.append(", id=").append(innerId);
         sb.append(", source=").append(Arrays.toString(source));
         sb.append(", target=").append(Arrays.toString(target));
         sb.append(", amount=").append(amount);

@@ -75,7 +75,7 @@ public class SignUtils {
 
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         try {
-            byte[] idBytes = GeneralConverter.toByteArrayLittleEndian(tStruct.getId(), 8);
+            byte[] idBytes = GeneralConverter.toByteArrayLittleEndian(tStruct.getInnerId(), 8);
             idBytes = ArrayUtils.remove(idBytes, 7); // delete two last bytes
             idBytes = ArrayUtils.remove(idBytes, 6);
             os.write(printBytes("id", idBytes));

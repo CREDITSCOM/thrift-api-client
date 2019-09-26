@@ -9,9 +9,10 @@ public class SmartContractTransactionData extends TransactionData implements Ser
     protected SmartContractInvocationData smartContractData;
 
     public SmartContractTransactionData(TransactionData transactionData, SmartContractInvocationData smartContractData) {
-        super(transactionData.getId(), transactionData.getSource(), transactionData.getTarget(), transactionData.getAmount(), transactionData.getType());
+        super(transactionData.getInnerId(), transactionData.getSource(), transactionData.getTarget(), transactionData.getAmount(), transactionData.getType());
         this.setSmartInfo(transactionData.getSmartInfo());
-        this.setBlockId(transactionData.getBlockId());
+        this.setBlockNumber(transactionData.getBlockNumber());
+        this.setIndexIntoBlock(transactionData.getIndexIntoBlock());
         this.setMethod(transactionData.getMethod());
         this.setParams(transactionData.getParams());
         this.setUsedContracts(transactionData.getUsedContracts());

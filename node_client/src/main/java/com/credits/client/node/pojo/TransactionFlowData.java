@@ -20,30 +20,35 @@ public class TransactionFlowData extends TransactionData implements Serializable
     public TransactionFlowData(long innerId, byte[] source, byte[] target, BigDecimal amount, Short offeredMaxFee16Bits,
                                byte[] smartContractBytes, byte[] commentBytes, List<ByteBuffer> usedContracts) {
         super();
-        this.setId(innerId);
+        this.setInnerId(innerId);
         this.setSource(source);
         this.setTarget(target);
         this.setAmount(amount);
-        this.setCurrency(currency);
         this.setOfferedMaxFee16Bits(offeredMaxFee16Bits);
         this.setSmartContractBytes(smartContractBytes);
         this.setCommentBytes(commentBytes);
         this.setUsedContracts(usedContracts);
     }
 
-    public TransactionFlowData(long innerId, byte[] source, byte[] target, BigDecimal amount, Short offeredMaxFee16Bits,
-        byte currency, byte[] smartContractBytes, byte[] commentBytes, List<ByteBuffer> usedContracts, byte[] signature) {
+    public TransactionFlowData(long innerId,
+                               byte[] source,
+                               byte[] target,
+                               BigDecimal amount,
+                               Short offeredMaxFee16Bits,
+                               byte[] smartContractBytes,
+                               byte[] commentBytes,
+                               List<ByteBuffer> usedContracts,
+                               byte[] signature) {
         this(innerId, source, target, amount, offeredMaxFee16Bits, smartContractBytes, commentBytes, usedContracts);
-        this.setCurrency(currency);
         this.setUsedContracts(usedContracts);
         this.setSignature(signature);
     }
 
 
     public TransactionFlowData(TransactionFlowData transaction) {
-        this(transaction.id, transaction.source, transaction.target, transaction.amount, transaction.offeredMaxFee16Bits,
-            transaction.currency, transaction.smartContractBytes, transaction.commentBytes, transaction.getUsedContracts(),
-            transaction.signature);
+        this(transaction.innerId, transaction.source, transaction.target, transaction.amount, transaction.offeredMaxFee16Bits,
+             transaction.smartContractBytes, transaction.commentBytes, transaction.getUsedContracts(),
+             transaction.signature);
     }
 
     public Short getOfferedMaxFee16Bits() {
@@ -96,15 +101,12 @@ public class TransactionFlowData extends TransactionData implements Serializable
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("TransactionFlowData{");
-        sb.append(", id=").append(id);
-        sb.append(", source=").append(Arrays.toString(source));
-        sb.append(", target=").append(Arrays.toString(target));
-        sb.append(", amount=").append(amount);
-        sb.append(", currency=").append(currency);
-        sb.append("offeredMaxFee16Bits=").append(offeredMaxFee16Bits);
-        sb.append(", signature=").append(Arrays.toString(signature));
-        sb.append('}');
-        return sb.toString();
+        return "TransactionFlowData{" + ", id=" + innerId +
+                ", source=" + Arrays.toString(source) +
+                ", target=" + Arrays.toString(target) +
+                ", amount=" + amount +
+                "offeredMaxFee16Bits=" + offeredMaxFee16Bits +
+                ", signature=" + Arrays.toString(signature) +
+                '}';
     }
 }

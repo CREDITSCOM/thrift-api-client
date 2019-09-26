@@ -62,8 +62,9 @@ public class NodePojoConverterTest {
         SealedTransaction sealedTransaction = new SealedTransaction(transactionId, transaction);
         TransactionData transactionData = createTransactionData(sealedTransaction);
         Assert.assertEquals(
-                "TransactionData{id=0, blockId='0.0', source=[115, 111, 117, 114, 99, 101], target=[116, 97, 114, 103, 101, 116], amount=0E-18, " +
-                        "currency=1, commentBytes=null, method='null', params=null, type=TT_Normal, smartInfo=null, usedContracts=null}",
+                "TransactionData(innerId=0, blockNumber=0, indexIntoBlock=0, source=[115, 111, 117, 114, 99, 101], target=[116, 97, 114, 103, 101, " +
+                        "116], amount=0E-18, currency=1, commentBytes=null, method=null, params=null, type=TT_Normal, smartInfo=null, " +
+                        "usedContracts=null, timeCreation=0, extraFeeDataList=null)",
                 transactionData.toString()
         );
     }
@@ -85,8 +86,8 @@ public class NodePojoConverterTest {
         );
         TransactionData transactionData = createTransactionData(transaction);
         Assert.assertEquals(
-                transactionData.toString(),
-                "TransactionData{id=0, blockId='null', source=[115, 111, 117, 114, 99, 101], target=[116, 97, 114, 103, 101, 116], amount=0E-18, currency=1, commentBytes=null, method='null', params=null, type=TT_Normal, smartInfo=null, usedContracts=null}"
+                "TransactionData(innerId=0, blockNumber=0, indexIntoBlock=0, source=[115, 111, 117, 114, 99, 101], target=[116, 97, 114, 103, 101, 116], amount=0E-18, currency=1, commentBytes=null, method=null, params=null, type=TT_Normal, smartInfo=null, usedContracts=null, timeCreation=0, extraFeeDataList=null)",
+                transactionData.toString()
         );
     }
 
