@@ -29,6 +29,7 @@ public class TransactionData implements Serializable {
     protected List<ByteBuffer> usedContracts;
     protected long timeCreation;
     protected List<ExtraFeeData> extraFeeDataList;
+    protected double maxFee;
 
     public TransactionData(long innerId, byte[] source, byte[] target, BigDecimal amount, TransactionTypeData type) {
         this.innerId = innerId;
@@ -36,5 +37,13 @@ public class TransactionData implements Serializable {
         this.target = target;
         this.amount = amount;
         this.type = type;
+    }
+
+    public void setMaxFee(double maxFee) {
+        this.maxFee = maxFee;
+    }
+
+    public double getMaxFee() {
+        return maxFee;
     }
 }

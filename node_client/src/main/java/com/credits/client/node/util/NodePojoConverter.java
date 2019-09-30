@@ -62,6 +62,7 @@ public class NodePojoConverter {
             data.setSmartInfo(createSmartTransInfoData(transaction.getSmartInfo()));
         }
         data.setType(createTransactionTypeData(transaction.getType()));
+        data.setMaxFee(transaction.getFee().commission);
         data.setUsedContracts(transaction.getUsedContracts());
         data.setTimeCreation(transaction.getTimeCreation());
         final var transactionExtraFee = transaction.getExtraFee();
