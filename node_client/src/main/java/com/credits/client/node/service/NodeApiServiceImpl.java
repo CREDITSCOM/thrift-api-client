@@ -20,12 +20,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 import static com.credits.client.node.util.NodeClientUtils.logApiResponse;
 import static com.credits.client.node.util.NodeClientUtils.processApiResponse;
 import static com.credits.client.node.util.NodePojoConverter.*;
+import static com.credits.general.util.Callback.handleCallback;
 import static com.credits.general.util.GeneralConverter.*;
 import static com.credits.general.util.Utils.threadPool;
 
@@ -303,15 +303,4 @@ public class NodeApiServiceImpl implements NodeApiService {
     public static <R> CompletableFuture<R> async(Function<R> apiCall) {
         return CompletableFuture.supplyAsync(apiCall::apply, threadPool);
     }
-
-    public static <R> BiConsumer<R, Throwable> handleCallback(Callback<R> callback) {
-        return (result, error) -> {
-            if (error == null) {
-                callback.onSuccess(result);
-            } else {
-                callback.onError(error);
-            }
-        };
-    }
-
 }
