@@ -47,4 +47,6 @@ public interface NodeApiService {
 
     @Deprecated
     TransactionsStateGetResultData getTransactionsState(String address, List<Long> transactionIdList) throws NodeClientException, ConverterException;
+
+    List<TransactionData> getTransactionsListFromPool(long poolNumber,  long offset, long limit)  throws NodeClientException, ConverterException;
 }

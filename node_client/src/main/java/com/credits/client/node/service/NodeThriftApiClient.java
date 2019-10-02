@@ -112,6 +112,12 @@ public class NodeThriftApiClient implements NodeThriftApi {
         return callThrift(client, () -> client.TransactionsStateGet(ByteBuffer.wrap(address),transactionIdList));
     }
 
+    @Override
+    public PoolTransactionsGetResult getTransactionsFromPool(long poolNumber, long offset, long limit){
+        API.Client client = pool.getResource();
+        return callThrift(client, () -> client.PoolTransactionsGet(poolNumber, offset, limit));
+    }
+
     private <R> R callThrift(API.Client client, Function<R> method) throws NodeClientException {
         try {
             R res = method.apply();

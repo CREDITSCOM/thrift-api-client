@@ -296,6 +296,15 @@ public class NodeApiServiceImpl implements NodeApiService {
         return NodePojoConverter.createTransactionsStateGetResultData(transactionsStateGetResult);
     }
 
+    @Override
+    public List<TransactionData> getTransactionsListFromPool(long poolNumber,
+                                                             long offset,
+                                                             long limit) throws NodeClientException, ConverterException {
+        final var response = nodeClient.getTransactionsFromPool(poolNumber, offset, limit);
+        processApiResponse(response.getStatus());
+        return response.getTransactions().stream().map(NodePojoConverter::createTransactionData).collect(Collectors.toList());
+    }
+
     public static <R> void async(Function<R> apiCall, Callback<R> callback) {
         CompletableFuture.supplyAsync(apiCall::apply, threadPool).whenComplete(handleCallback(callback));
     }

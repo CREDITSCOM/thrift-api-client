@@ -31,4 +31,6 @@ interface NodeThriftApi {
 
     @Deprecated
     TransactionsStateGetResult getTransactionsState(byte[] address, List<Long> transactionIdList) throws NodeClientException;
+
+    PoolTransactionsGetResult getTransactionsFromPool(long poolNumber, long offset, long limit);
 }
