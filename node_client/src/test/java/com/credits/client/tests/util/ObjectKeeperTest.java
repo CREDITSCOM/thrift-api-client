@@ -22,13 +22,14 @@ public class ObjectKeeperTest {
     HashMap<String, SmartContractData> someData = new HashMap<>();
     ObjectKeeper<HashMap<String,SmartContractData>> objectKeeper;
     String account = "G2iSMjqaEQmA5pvFuFjKbMqJUxJZceAY5oc1uotr7SZZ";
+    long timeCreation = 0L;
 
     @Before
     public void setUp() throws IOException {
         objectKeeper = new ObjectKeeper<>(account, "obj");
         deleteCacheDirectory();
         SmartContractDeployData smartContractDeployData = new SmartContractDeployData("aaa", null, 0);
-        someData.put("1",new SmartContractData(null, null, smartContractDeployData,null, null));
+        someData.put("1",new SmartContractData(null, null, smartContractDeployData, null, null, timeCreation));
     }
 
 
@@ -57,7 +58,7 @@ public class ObjectKeeperTest {
                 public HashMap<String, SmartContractData> modify(HashMap<String, SmartContractData> keptObject) {
                     if (keptObject != null) {
                         SmartContractDeployData smartContractDeployData = new SmartContractDeployData("BBB", null, 0);
-                        keptObject.put("2", new SmartContractData(null, null, smartContractDeployData, null, null));
+                        keptObject.put("2", new SmartContractData(null, null, smartContractDeployData, null, null, timeCreation));
                     }
                     return keptObject;
                 }
@@ -70,7 +71,7 @@ public class ObjectKeeperTest {
         objectKeeper.keepObject(someData);
         HashMap<String, SmartContractData> restoredObject = objectKeeper.getKeptObject().get();
         SmartContractDeployData smartContractDeployData = new SmartContractDeployData("BBB", null, 0);
-        restoredObject.put("2", new SmartContractData(null, null, smartContractDeployData, null, null));
+        restoredObject.put("2", new SmartContractData(null, null, smartContractDeployData, null, null, timeCreation));
         objectKeeper.keepObject(restoredObject);
         restoredObject = objectKeeper.getKeptObject().get();
         Assert.assertEquals(2, restoredObject.size());

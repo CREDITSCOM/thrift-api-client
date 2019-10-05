@@ -17,11 +17,12 @@ public class CompiledSmartContract extends SmartContractData implements Serializ
         SmartContractClass contractClass,
         List<ByteCodeObjectData> byteCodeObjectsData) {
         super(
-            smartContractData.getAddress(),
-            smartContractData.getDeployer(),
-            smartContractData.getSmartContractDeployData(),
-            smartContractData.getObjectState(),
-            smartContractData.getTransactionsCount());
+                smartContractData.getAddress(),
+                smartContractData.getDeployer(),
+                smartContractData.getSmartContractDeployData(),
+                smartContractData.getObjectState(),
+                smartContractData.getTransactionsCount(),
+                smartContractData.getTimeCreation());
         this.contractClass = contractClass;
         this.byteCodeObjects = byteCodeObjectsData;
     }

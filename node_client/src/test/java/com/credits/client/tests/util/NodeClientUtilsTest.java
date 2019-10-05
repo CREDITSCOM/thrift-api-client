@@ -22,8 +22,8 @@ public class NodeClientUtilsTest {
             "deployer".getBytes(),
             smartContractDeployData,
             null,
-                null
-        );
+                null,
+            System.currentTimeMillis());
 
         byte[] smartContractBytes = NodeClientUtils.serializeByThrift(smartContractData);
         Assert.assertEquals(
