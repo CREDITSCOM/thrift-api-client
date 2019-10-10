@@ -37,6 +37,8 @@ public interface NodeApiService {
 
     List<TransactionData> getTransactionsListFromPool(long poolNumber, long offset, long limit) throws NodeClientException;
 
+    ModifiedInnerIdSenderReceiver modifyInnerIdSenderReceiver(long innerId, String sender, String receiver);
+
     TransactionFlowResultData invokeContractGetterMethod(String initiator,
                                                          String contractAddress,
                                                          String method,

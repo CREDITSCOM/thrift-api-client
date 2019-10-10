@@ -28,8 +28,7 @@ import static com.credits.client.node.util.NodeClientUtils.*;
 import static com.credits.client.node.util.NodePojoConverter.*;
 import static com.credits.client.node.util.SignUtils.signTransaction;
 import static com.credits.general.util.Callback.handleCallback;
-import static com.credits.general.util.GeneralConverter.amountToBigDecimal;
-import static com.credits.general.util.GeneralConverter.decodeFromBASE58;
+import static com.credits.general.util.GeneralConverter.*;
 import static com.credits.general.util.Utils.calculateActualFee;
 import static com.credits.general.util.Utils.threadPool;
 import static java.math.BigDecimal.ZERO;
@@ -321,6 +320,28 @@ public class NodeApiServiceImpl implements NodeApiService {
         final var response = nodeClient.getTransactionsFromPool(poolNumber, offset, limit);
         processApiResponse(response.getStatus());
         return response.getTransactions().stream().map(NodePojoConverter::createTransactionData).collect(toList());
+    }
+
+    @Override
+    public ModifiedInnerIdSenderReceiver modifyInnerIdSenderReceiver(long innerId, String sender, String receiver) {
+        var senderIndexExistsBit = 0L;
+        var receiverIndexExistBit = 0L;
+
+        final var senderAddressId = getWalletId(sender);
+        if (senderAddressId != 0) {
+            sender = encodeToBASE58(toByteArrayLittleEndian(senderAddressId, 4));
+            senderIndexExistsBit = 1L << 47;
+        }
+
+        final var receiverAddressId = getWalletId(receiver);
+        if (receiverAddressId != 0) {
+            receiver = encodeToBASE58(toByteArrayLittleEndian(receiverAddressId, 4));
+            receiverIndexExistBit = 1L << 46;
+        }
+
+        final var newInnerId = (innerId & (-1 >> 18)) | senderIndexExistsBit | receiverIndexExistBit;
+
+        return new ModifiedInnerIdSenderReceiver(newInnerId, sender, receiver);
     }
 
 

@@ -38,16 +38,18 @@ public class SignUtils {
 
     private static byte[] printBytes(String message, byte[] bytes) {
         if(bytes != null) {
-            StringBuilder arrStr = new StringBuilder();
-            LOGGER.debug("");
-            LOGGER.debug("----- {} -----", message);
-            LOGGER.debug("{} bytes", bytes.length);
+            if(LOGGER.isDebugEnabled()) {
+                StringBuilder arrStr = new StringBuilder();
+                LOGGER.debug("");
+                LOGGER.debug("----- {} -----", message);
+                LOGGER.debug("{} bytes", bytes.length);
 
-            for (byte b : bytes) {
-                arrStr.append(String.format("%02X", b));
+                for (byte b : bytes) {
+                    arrStr.append(String.format("%02X", b));
+                }
+                LOGGER.debug(arrStr.toString());
+                LOGGER.debug("--------------------------");
             }
-            LOGGER.debug(arrStr.toString());
-            LOGGER.debug("--------------------------");
         }
         return bytes;
     }
