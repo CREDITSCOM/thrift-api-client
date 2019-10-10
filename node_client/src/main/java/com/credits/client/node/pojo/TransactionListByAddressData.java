@@ -6,7 +6,7 @@ import java.util.List;
 
 
 @Value
-public class TransactionsAndAmountData {
+public class TransactionListByAddressData {
     int amountTotalTransactions;
     List<TransactionData> transactionsList;
 }

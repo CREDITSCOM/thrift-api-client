@@ -17,7 +17,7 @@ public class TransactionFlowData extends TransactionData implements Serializable
     public TransactionFlowData() {
     }
 
-    public TransactionFlowData(long innerId, byte[] source, byte[] target, BigDecimal amount, Short offeredMaxFee16Bits,
+    public TransactionFlowData(long innerId, byte[] source, byte[] target, BigDecimal amount, short offeredMaxFee16Bits,
                                byte[] smartContractBytes, byte[] commentBytes, List<ByteBuffer> usedContracts) {
         super();
         this.setInnerId(innerId);
@@ -34,7 +34,7 @@ public class TransactionFlowData extends TransactionData implements Serializable
                                byte[] source,
                                byte[] target,
                                BigDecimal amount,
-                               Short offeredMaxFee16Bits,
+                               short offeredMaxFee16Bits,
                                byte[] smartContractBytes,
                                byte[] commentBytes,
                                List<ByteBuffer> usedContracts,
@@ -49,6 +49,16 @@ public class TransactionFlowData extends TransactionData implements Serializable
         this(transaction.innerId, transaction.source, transaction.target, transaction.amount, transaction.offeredMaxFee16Bits,
              transaction.smartContractBytes, transaction.commentBytes, transaction.getUsedContracts(),
              transaction.signature);
+    }
+
+    public TransactionFlowData(long innerId,
+                               byte[] source,
+                               byte[] target,
+                               BigDecimal amount,
+                               short fee,
+                               byte[] userData,
+                               List<ByteBuffer> usedContracts) {
+        this(innerId, source, target, amount, fee, null, userData, usedContracts);
     }
 
     public Short getOfferedMaxFee16Bits() {

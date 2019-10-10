@@ -6,16 +6,19 @@ import com.credits.client.node.thrift.generated.*;
 import com.credits.general.thrift.generated.Amount;
 import com.credits.general.util.GeneralConverter;
 import com.credits.general.util.exception.ConverterException;
+import com.credits.general.util.variant.VariantConverter;
 
 import java.math.BigDecimal;
 import java.nio.ByteBuffer;
+import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
-import java.util.stream.Collectors;
 
 import static com.credits.client.node.pojo.SmartContractInvocationData.SMART_CONTRACT_INVOCATION_VERSION;
-import static com.credits.general.util.GeneralConverter.amountToBigDecimal;
-import static com.credits.general.util.GeneralConverter.bigDecimalToAmount;
+import static com.credits.general.util.GeneralConverter.*;
 import static com.credits.general.util.GeneralPojoConverter.createApiResponseData;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 
 
 public class NodePojoConverter {
@@ -67,7 +70,7 @@ public class NodePojoConverter {
         data.setTimeCreation(transaction.getTimeCreation());
         final var transactionExtraFee = transaction.getExtraFee();
         if(transactionExtraFee != null) {
-            final var extraFeeDataList = transactionExtraFee.stream().map(NodePojoConverter::toExtraFeeData).collect(Collectors.toList());
+            final var extraFeeDataList = transactionExtraFee.stream().map(NodePojoConverter::toExtraFeeData).collect(toList());
             data.setExtraFeeDataList(extraFeeDataList);
         }
         return data;
@@ -129,14 +132,13 @@ public class NodePojoConverter {
 
         SmartContractDeploy thriftStruct = new SmartContractDeploy();
         thriftStruct.setSourceCode(data.getSourceCode());
-        thriftStruct.setByteCodeObjects(
-                GeneralConverter.byteCodeObjectsDataToByteCodeObjects(data.getByteCodeObjects()));
-        thriftStruct.setHashState(data.getHashState());
+        thriftStruct.setByteCodeObjects(byteCodeObjectsDataToByteCodeObjects(data.getByteCodeObjectDataList()));
+        thriftStruct.setHashState("");
         thriftStruct.setTokenStandard(data.getTokenStandardId());
         return thriftStruct;
     }
 
-    public static SmartContractData smartContractToSmartContractData(SmartContract smartContract) {
+    public static SmartContractData toSmartContractData(SmartContract smartContract) {
 
         return new SmartContractData(smartContract.getAddress(),
                                      smartContract.getDeployer(),
@@ -148,7 +150,7 @@ public class NodePojoConverter {
 
     public static SmartContractDeployData createSmartContractDeployData(SmartContractDeploy thriftStruct) {
         return new SmartContractDeployData(thriftStruct.getSourceCode(),
-                                           GeneralConverter.byteCodeObjectsToByteCodeObjectsData(thriftStruct.getByteCodeObjects()),
+                                           byteCodeObjectsToByteCodeObjectsData(thriftStruct.getByteCodeObjects()),
                                            thriftStruct.getTokenStandard());
     }
 
@@ -227,33 +229,55 @@ public class NodePojoConverter {
         }
     }
 
-    public static SmartContractInvocation createSmartContractInvocation(
-            SmartContractInvocationData smartContractInvocationData) {
+    public static SmartContractInvocation createSmartContractInvocation(SmartContractDeployData deployData, List<String> usedContracts) {
+        final var usedContractsByteBuffer = toByteBufferUsedContracts(usedContracts);
+        final var smartContractDeploy = smartContractDeployDataToSmartContractDeploy(deployData);
+        return new SmartContractInvocation("",
+                                           Collections.emptyList(),
+                                           usedContractsByteBuffer,
+                                           false,
+                                           SMART_CONTRACT_INVOCATION_VERSION)
+                .setSmartContractDeploy(smartContractDeploy);
+    }
 
-        final var thriftStruct = new SmartContractInvocation(smartContractInvocationData.getMethod(),
-                                                             smartContractInvocationData.getParams(),
-                                                             smartContractInvocationData.getUsedContracts(),
-                                                             smartContractInvocationData.isForgetNewState(),
-                                                             SMART_CONTRACT_INVOCATION_VERSION);
-        SmartContractDeployData smartContractDeployData = smartContractInvocationData.getSmartContractDeployData();
-        if (smartContractDeployData != null) {
-            thriftStruct.setSmartContractDeploy(smartContractDeployDataToSmartContractDeploy(smartContractDeployData));
-        }
+    public static SmartContractInvocation createSmartContractInvocation(SmartContractInvocationData invocationData) {
+        final var variantParams = invocationData.getParams()
+                .stream()
+                .map(VariantConverter::toVariant)
+                .collect(toList());
 
-        return thriftStruct;
+        final List<ByteBuffer> usedContracts = toByteBufferUsedContracts(invocationData.getUsedContracts());
+
+        return new SmartContractInvocation(invocationData.getMethod(),
+                                           variantParams,
+                                           usedContracts,
+                                           invocationData.isForgetNewState(),
+                                           SMART_CONTRACT_INVOCATION_VERSION);
+    }
+
+    public static List<ByteBuffer> toByteBufferUsedContracts(List<String> usedContracts) {
+        return usedContracts
+                .stream()
+                .map(GeneralConverter::decodeFromBASE58)
+                .map(ByteBuffer::wrap)
+                .collect(toList());
     }
 
     public static SmartContractInvocationData createSmartContractInvocationData(SmartContractInvocation thriftStruct) {
 
-        return new SmartContractInvocationData(createSmartContractDeployData(thriftStruct.getSmartContractDeploy()),
-                                               thriftStruct.getMethod(),
+        final var stringListUsedContracts = thriftStruct.getUsedContracts()
+                .stream()
+                .map(ByteBuffer::array)
+                .map(GeneralConverter::encodeToBASE58)
+                .collect(toList());
+
+        return new SmartContractInvocationData(thriftStruct.getMethod(),
                                                thriftStruct.getParams(),
-                                               thriftStruct.getUsedContracts(), thriftStruct.forgetNewState);
+                                               stringListUsedContracts,
+                                               thriftStruct.forgetNewState);
     }
 
-    public static Transaction smartContractTransactionFlowDataToTransaction(
-            SmartContractTransactionFlowData scTransaction) {
-
+    public static Transaction smartContractTransactionFlowDataToTransaction(SmartContractTransactionFlowData scTransaction) {
         Transaction transaction = new Transaction();
         transaction.id = scTransaction.getInnerId();
         transaction.source = ByteBuffer.wrap(scTransaction.getSource());
@@ -278,8 +302,9 @@ public class NodePojoConverter {
                                                 : createSmartContractInvocationData(thriftStruct.getTrxn().getSmartContract()));
     }
 
-    public static TransactionFlowResultData transactionFlowResultToTransactionFlowResultData(
-            TransactionFlowResult result, byte[] source, byte[] target) {
+    public static TransactionFlowResultData toTransactionFlowResultData(TransactionFlowResult result,
+                                                                        byte[] source,
+                                                                        byte[] target) {
         return new TransactionFlowResultData(createApiResponseData(result.getStatus()), result.getRoundNum(), source,
                                              target,
                                              result.getSmart_contract_result());
@@ -382,7 +407,7 @@ public class NodePojoConverter {
         return new TransactionsStateGetResultData(createApiResponseData(result.getStatus()), result.getStates()
                 .entrySet()
                 .stream()
-                .collect(Collectors.toMap(e -> e.getKey(), e -> transactionStateToTransactionStateData(e.getValue()))),
+                .collect(toMap(e -> e.getKey(), e -> transactionStateToTransactionStateData(e.getValue()))),
                                                   result.getRoundNum());
     }
 }
