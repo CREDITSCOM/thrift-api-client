@@ -149,7 +149,7 @@ public class NodeApiServiceImpl implements NodeApiService {
         final var decodedUsedContracts = toByteBufferUsedContracts(usedContracts);
         final var shortFee = calculateActualFee((double) fee).getRight();
         final var deployData = new SmartContractDeployData(sourceCode, byteCodeObjects, tokenStandardId);
-        final var smartContractDeploy = createSmartContractInvocation(deployData, usedContracts);
+        final var smartContractDeploy = toSmartContractInvocation(deployData, usedContracts);
         final var serializedContract = serializeThriftStructure(smartContractDeploy);
         final var transactionData = new TransactionFlowData(innerId,
                                                             decodedSender,
@@ -160,7 +160,7 @@ public class NodeApiServiceImpl implements NodeApiService {
                                                             decodedUsedContracts);
         signTransaction(transactionData, privateKey);
 
-        final var transaction = transactionFlowDataToTransaction(transactionData);
+        final var transaction = NodePojoConverter.toTransaction(transactionData);
         return callTransactionFlow(transaction);
     }
 
@@ -178,7 +178,8 @@ public class NodeApiServiceImpl implements NodeApiService {
         final var decodedUsedContracts = toByteBufferUsedContracts(usedContracts);
         final var shortFee = calculateActualFee((double) fee).getRight();
         final var variantParams = params.stream().map(VariantConverter::toVariant).collect(toList());
-        final var contractInvocation = new SmartContractInvocationData(method, variantParams, usedContracts, false);
+        final var contractInvocationData = new SmartContractInvocationData(method, variantParams, usedContracts, false);
+        final var contractInvocation = toSmartContractInvocation(contractInvocationData);
         final var serializedContract = serializeByThrift(contractInvocation);
         final var transactionData = new TransactionFlowData(innerId,
                                                             decodedSender,
@@ -189,7 +190,7 @@ public class NodeApiServiceImpl implements NodeApiService {
                                                             decodedUsedContracts);
         signTransaction(transactionData, privateKey);
 
-        final var transaction = transactionFlowDataToTransaction(transactionData);
+        final var transaction = NodePojoConverter.toTransaction(transactionData, contractInvocation);
         return callTransactionFlow(transaction);
     }
 
@@ -210,10 +211,10 @@ public class NodeApiServiceImpl implements NodeApiService {
                                                             decodedSender,
                                                             decodedReceiver,
                                                             ZERO,
-                                                            (short) 0,
+                                                            (short) 17510, //0.01
                                                             serializedContract,
                                                             decodedUsedContracts);
-        final var transaction = transactionFlowDataToTransaction(transactionData);
+        final var transaction = NodePojoConverter.toTransaction(transactionData, contract);
         return callTransactionFlow(transaction);
     }
 
@@ -239,7 +240,7 @@ public class NodeApiServiceImpl implements NodeApiService {
                                                             decodedUsedContracts);
         signTransaction(transactionData, privateKey);
 
-        final var transaction = transactionFlowDataToTransaction(transactionData);
+        final var transaction = NodePojoConverter.toTransaction(transactionData);
         return callTransactionFlow(transaction);
     }
 

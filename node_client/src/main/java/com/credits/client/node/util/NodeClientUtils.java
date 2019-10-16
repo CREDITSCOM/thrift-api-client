@@ -2,7 +2,7 @@ package com.credits.client.node.util;
 
 import com.credits.client.node.exception.NodeClientException;
 import com.credits.client.node.pojo.SmartContractData;
-import com.credits.client.node.pojo.SmartContractInvocationData;
+import com.credits.client.node.thrift.generated.SmartContractInvocation;
 import com.credits.general.pojo.ApiResponseCode;
 import com.credits.general.thrift.generated.APIResponse;
 import lombok.NonNull;
@@ -12,7 +12,6 @@ import org.apache.thrift.TSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static com.credits.client.node.util.NodePojoConverter.createSmartContractInvocation;
 import static com.credits.client.node.util.NodePojoConverter.smartContractDataToSmartContract;
 import static com.credits.general.pojo.ApiResponseCode.NOT_FOUND;
 import static com.credits.general.pojo.ApiResponseCode.SUCCESS;
@@ -40,8 +39,7 @@ public class NodeClientUtils {
         return serializeThriftStructure(smartContract);
     }
 
-    public static byte[] serializeByThrift(@NonNull SmartContractInvocationData smartContractData) {
-        final var smartContract = createSmartContractInvocation(smartContractData);
+    public static byte[] serializeByThrift(@NonNull SmartContractInvocation smartContract) {
         return serializeThriftStructure(smartContract);
     }
 

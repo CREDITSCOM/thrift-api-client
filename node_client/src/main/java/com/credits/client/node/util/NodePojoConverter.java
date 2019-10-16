@@ -229,7 +229,7 @@ public class NodePojoConverter {
         }
     }
 
-    public static SmartContractInvocation createSmartContractInvocation(SmartContractDeployData deployData, List<String> usedContracts) {
+    public static SmartContractInvocation toSmartContractInvocation(SmartContractDeployData deployData, List<String> usedContracts) {
         final var usedContractsByteBuffer = toByteBufferUsedContracts(usedContracts);
         final var smartContractDeploy = smartContractDeployDataToSmartContractDeploy(deployData);
         return new SmartContractInvocation("",
@@ -240,7 +240,7 @@ public class NodePojoConverter {
                 .setSmartContractDeploy(smartContractDeploy);
     }
 
-    public static SmartContractInvocation createSmartContractInvocation(SmartContractInvocationData invocationData) {
+    public static SmartContractInvocation toSmartContractInvocation(SmartContractInvocationData invocationData) {
         final var variantParams = invocationData.getParams()
                 .stream()
                 .map(VariantConverter::toVariant)
@@ -288,7 +288,7 @@ public class NodePojoConverter {
         transaction.signature = ByteBuffer.wrap(scTransaction.getSignature());
         transaction.fee = new AmountCommission(scTransaction.getOfferedMaxFee16Bits());
         SmartContractInvocation smartContractInvocation =
-                createSmartContractInvocation(scTransaction.getSmartContractData());
+                toSmartContractInvocation(scTransaction.getSmartContractData());
         transaction.setSmartContract(smartContractInvocation);
         transaction.setSmartContractIsSet(true);
         return transaction;
@@ -310,7 +310,7 @@ public class NodePojoConverter {
                                              result.getSmart_contract_result());
     }
 
-    public static Transaction transactionFlowDataToTransaction(TransactionFlowData transactionData) {
+    public static Transaction toTransaction(TransactionFlowData transactionData) {
         Transaction transaction = new Transaction();
         transaction.id = transactionData.getInnerId();
         transaction.source = ByteBuffer.wrap(transactionData.getSource());
@@ -323,6 +323,13 @@ public class NodePojoConverter {
         if (transactionData.getSignature() != null) {
             transaction.signature = ByteBuffer.wrap(transactionData.getSignature());
         }
+        return transaction;
+    }
+
+    public static Transaction toTransaction(TransactionFlowData transactionData, SmartContractInvocation smartContractInvocation) {
+        final var transaction = toTransaction(transactionData);
+        transaction.setSmartContract(smartContractInvocation);
+        transaction.setSmartContractIsSet(true);
         return transaction;
     }
 
