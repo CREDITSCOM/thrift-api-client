@@ -145,7 +145,7 @@ public class NodeApiServiceImpl implements NodeApiService {
                                                              List<String> usedContracts,
                                                              PrivateKey privateKey) {
         final var decodedSender = decodeFromBASE58(initiator);
-        final var decodedReceiver = decodeFromBASE58(initiator);
+        final var decodedReceiver = decodeFromBASE58(contractAddress);
         final var decodedUsedContracts = toByteBufferUsedContracts(usedContracts);
         final var shortFee = calculateActualFee((double) fee).getRight();
         final var deployData = new SmartContractDeployData(sourceCode, byteCodeObjects, tokenStandardId);
@@ -174,7 +174,7 @@ public class NodeApiServiceImpl implements NodeApiService {
                                                              List<String> usedContracts,
                                                              PrivateKey privateKey) {
         final var decodedSender = decodeFromBASE58(initiator);
-        final var decodedReceiver = decodeFromBASE58(initiator);
+        final var decodedReceiver = decodeFromBASE58(contractAddress);
         final var decodedUsedContracts = toByteBufferUsedContracts(usedContracts);
         final var shortFee = calculateActualFee((double) fee).getRight();
         final var variantParams = params.stream().map(VariantConverter::toVariant).collect(toList());
@@ -300,10 +300,10 @@ public class NodeApiServiceImpl implements NodeApiService {
 
     @Override
     public int getWalletId(String address) throws NodeClientException, ConverterException {
-        LOGGER.debug("--->  get wallet id");
+        LOGGER.debug("--->  get wallet id for address {}", address);
         final var result = nodeClient.getWalletId(decodeFromBASE58(address));
         processApiResponse(result.getStatus());
-        LOGGER.debug("<---  get wallet id {}", result.getWalletId());
+        LOGGER.debug("<---  get wallet id for address {} = {}", address, result.getWalletId());
         return result.getWalletId();
     }
 
