@@ -328,16 +328,20 @@ public class NodeApiServiceImpl implements NodeApiService {
         var senderIndexExistsBit = 0L;
         var receiverIndexExistBit = 0L;
 
-        final var senderAddressId = getWalletId(sender);
-        if (senderAddressId != 0) {
-            sender = encodeToBASE58(toByteArrayLittleEndian(senderAddressId, 4));
-            senderIndexExistsBit = 1L << 47;
+        if(sender != null) {
+            final var senderAddressId = getWalletId(sender);
+            if (senderAddressId != 0) {
+                sender = encodeToBASE58(toByteArrayLittleEndian(senderAddressId, 4));
+                senderIndexExistsBit = 1L << 47;
+            }
         }
 
-        final var receiverAddressId = getWalletId(receiver);
-        if (receiverAddressId != 0) {
-            receiver = encodeToBASE58(toByteArrayLittleEndian(receiverAddressId, 4));
-            receiverIndexExistBit = 1L << 46;
+        if(receiver != null) {
+            final var receiverAddressId = getWalletId(receiver);
+            if (receiverAddressId != 0) {
+                receiver = encodeToBASE58(toByteArrayLittleEndian(receiverAddressId, 4));
+                receiverIndexExistBit = 1L << 46;
+            }
         }
 
         final var newInnerId = (innerId & (-1 >> 18)) | senderIndexExistsBit | receiverIndexExistBit;
