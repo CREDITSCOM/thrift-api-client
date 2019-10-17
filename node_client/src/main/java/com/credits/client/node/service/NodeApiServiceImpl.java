@@ -157,10 +157,10 @@ public class NodeApiServiceImpl implements NodeApiService {
                                                             ZERO,
                                                             shortFee,
                                                             serializedContract,
-                                                            decodedUsedContracts);
+                                                            decodedUsedContracts); //todo decodedContracts created twice
         signTransaction(transactionData, privateKey);
 
-        final var transaction = NodePojoConverter.toTransaction(transactionData);
+        final var transaction = toTransaction(transactionData, smartContractDeploy);
         return callTransactionFlow(transaction);
     }
 
@@ -190,7 +190,7 @@ public class NodeApiServiceImpl implements NodeApiService {
                                                             decodedUsedContracts);
         signTransaction(transactionData, privateKey);
 
-        final var transaction = NodePojoConverter.toTransaction(transactionData, contractInvocation);
+        final var transaction = toTransaction(transactionData, contractInvocation);
         return callTransactionFlow(transaction);
     }
 
@@ -214,7 +214,7 @@ public class NodeApiServiceImpl implements NodeApiService {
                                                             (short) 17510, //0.01
                                                             serializedContract,
                                                             decodedUsedContracts);
-        final var transaction = NodePojoConverter.toTransaction(transactionData, contract);
+        final var transaction = toTransaction(transactionData, contract);
         return callTransactionFlow(transaction);
     }
 
@@ -240,7 +240,7 @@ public class NodeApiServiceImpl implements NodeApiService {
                                                             decodedUsedContracts);
         signTransaction(transactionData, privateKey);
 
-        final var transaction = NodePojoConverter.toTransaction(transactionData);
+        final var transaction = toTransaction(transactionData);
         return callTransactionFlow(transaction);
     }
 
