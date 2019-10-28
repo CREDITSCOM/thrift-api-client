@@ -1,5 +1,6 @@
 package com.credits.general.thrift;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.pool.BasePoolableObjectFactory;
 import org.apache.commons.pool.impl.GenericObjectPool;
 import org.apache.thrift.TServiceClient;
@@ -61,9 +62,7 @@ public class ThriftClientPool<T extends TServiceClient> implements
                 TProtocol protocol = protocolFactory.make();
                 return clientFactory.make(protocol);
             } catch (Exception e) {
-                LOGGER.warn("whut?", e);
-                throw new ThriftClientException(
-                        "Can not make a new object for pool", e);
+                throw new ThriftClientException(ExceptionUtils.getRootCauseMessage(e), e);
             }
         }
 
@@ -102,7 +101,6 @@ public class ThriftClientPool<T extends TServiceClient> implements
             try {
                 transport.open();
             } catch (TTransportException e) {
-                LOGGER.warn("whut?", e);
                 throw new ThriftClientException("Can not make protocol", e);
             }
             return new TBinaryProtocol(transport);
