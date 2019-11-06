@@ -60,22 +60,25 @@ public class NodeApiServiceImpl implements NodeApiService {
 
     @Override
     public BigDecimal getBalance(String address) throws NodeClientException, ConverterException {
-        LOGGER.info(String.format("getBalance: ---> address = %s", address));
+        LOGGER.info(String.format("WalletBalanceGet(%s) ---> ", address));
         WalletBalanceGetResult result = nodeClient.getBalance(decodeFromBASE58(address));
         processApiResponse(result.getStatus());
         Amount amount = result.getBalance();
         BigDecimal balance = amountToBigDecimal(amount);
-        LOGGER.info(String.format("getBalance: <--- balance = %s", balance));
+        LOGGER.info(String.format("WalletBalanceGet: <--- balance = %s", balance));
         return balance;
     }
 
     @Override
     public SyncStateInfoData getSyncStateInfo() throws NodeClientException, ConverterException {
+        LOGGER.info("SyncStateGet ---> ");
         SyncStateResult result = nodeClient.getSync();
         processApiResponse(result.getStatus());
         final var currentBlock = result.getCurrRound();
         final var lastBlock = result.getLastBlock();
-        return new SyncStateInfoData(currentBlock, lastBlock);
+        final var syncStateInfoData = new SyncStateInfoData(currentBlock, lastBlock);
+        LOGGER.debug("SyncStateGet: <-- {}", syncStateInfoData);
+        return syncStateInfoData;
     }
 
     @Override
@@ -293,8 +296,10 @@ public class NodeApiServiceImpl implements NodeApiService {
 
     @Override
     public WalletData getWalletData(String address) throws NodeClientException, ConverterException {
+        LOGGER.debug("--->  WalletDataGet {}", address);
         WalletDataGetResult result = nodeClient.getWalletData(decodeFromBASE58(address));
         processApiResponse(result.getStatus());
+        LOGGER.debug("<---  WalletDataGet = {}", result);
         return walletToWalletData(result.getWalletData());
     }
 
