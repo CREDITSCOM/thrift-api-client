@@ -1,5 +1,8 @@
 package com.credits.client.node.pojo;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.nio.ByteBuffer;
@@ -8,17 +11,23 @@ import java.util.List;
 import java.util.Objects;
 
 
+@NoArgsConstructor
 public class TransactionFlowData extends TransactionData implements Serializable {
     private static final long serialVersionUID = 4544650022718657166L;
     protected Short offeredMaxFee16Bits;
     protected byte[] smartContractBytes;
     protected byte[] signature;
+    @Getter
+    protected int delegationOptions;
 
-    public TransactionFlowData() {
-    }
-
-    public TransactionFlowData(long innerId, byte[] source, byte[] target, BigDecimal amount, short offeredMaxFee16Bits,
-                               byte[] smartContractBytes, byte[] commentBytes, List<ByteBuffer> usedContracts) {
+    public TransactionFlowData(long innerId,
+                               byte[] source,
+                               byte[] target,
+                               BigDecimal amount,
+                               short offeredMaxFee16Bits,
+                               byte[] smartContractBytes,
+                               byte[] commentBytes,
+                               List<ByteBuffer> usedContracts) {
         super();
         this.setInnerId(innerId);
         this.setSource(source);
@@ -49,6 +58,7 @@ public class TransactionFlowData extends TransactionData implements Serializable
         this(transaction.innerId, transaction.source, transaction.target, transaction.amount, transaction.offeredMaxFee16Bits,
              transaction.smartContractBytes, transaction.commentBytes, transaction.getUsedContracts(),
              transaction.signature);
+        delegationOptions = transaction.getDelegationOptions();
     }
 
     public TransactionFlowData(long innerId,
@@ -58,7 +68,19 @@ public class TransactionFlowData extends TransactionData implements Serializable
                                short fee,
                                byte[] userData,
                                List<ByteBuffer> usedContracts) {
+        this(innerId, source, target, amount, fee, userData, 0, usedContracts);
+    }
+
+    public TransactionFlowData(long innerId,
+                               byte[] source,
+                               byte[] target,
+                               BigDecimal amount,
+                               short fee,
+                               byte[] userData,
+                               int delegationOptions,
+                               List<ByteBuffer> usedContracts) {
         this(innerId, source, target, amount, fee, null, userData, usedContracts);
+        this.delegationOptions = delegationOptions;
     }
 
     public Short getOfferedMaxFee16Bits() {

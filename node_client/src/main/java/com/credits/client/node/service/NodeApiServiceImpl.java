@@ -230,6 +230,19 @@ public class NodeApiServiceImpl implements NodeApiService {
                                                                List<String> usedContracts,
                                                                byte[] userData,
                                                                PrivateKey privateKey) {
+        return submitTransferTransaction(innerId, sender, receiver, amount, fee, usedContracts, userData, 0, privateKey);
+    }
+
+    @Override
+    public TransactionFlowResultData submitTransferTransaction(long innerId,
+                                                               String sender,
+                                                               String receiver,
+                                                               BigDecimal amount,
+                                                               float fee,
+                                                               List<String> usedContracts,
+                                                               byte[] userData,
+                                                               int delegationOptions,
+                                                               PrivateKey privateKey) throws NodeClientException {
         final var decodedSender = decodeFromBASE58(sender);
         final var decodedReceiver = decodeFromBASE58(receiver);
         final var decodedUsedContracts = toByteBufferUsedContracts(usedContracts);
@@ -245,6 +258,7 @@ public class NodeApiServiceImpl implements NodeApiService {
 
         final var transaction = toTransaction(transactionData);
         return callTransactionFlow(transaction);
+
     }
 
     private TransactionFlowResultData callTransactionFlow(Transaction transaction) {

@@ -75,6 +75,11 @@ public class SignUtils {
             ufNum++;
         }
 
+        final var isDelegateTransaction = tStruct.getDelegationOptions() != 0;
+        if(isDelegateTransaction){
+            ufNum++;
+        }
+
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         try {
             byte[] idBytes = GeneralConverter.toByteArrayLittleEndian(tStruct.getInnerId(), 8);
@@ -95,6 +100,10 @@ public class SignUtils {
             if (isCommentBytesExists) {
                 os.write(printBytes("commentLen", GeneralConverter.toByteArrayLittleEndian(commentBytes.length, 4)));
                 os.write(printBytes("comment", GeneralConverter.toByteArrayLittleEndian(commentBytes, commentBytes.length)));
+            }
+            if(isDelegateTransaction){
+                os.write(printBytes("delegateOptionsLen", GeneralConverter.toByteArrayLittleEndian(4, 4)));
+                os.write(printBytes("delegateOptions", GeneralConverter.toByteArrayLittleEndian(tStruct.getDelegationOptions(), 4)));
             }
         } catch (IOException e) {
             // do nothing - never happen
