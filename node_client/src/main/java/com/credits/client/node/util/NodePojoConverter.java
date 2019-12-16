@@ -6,7 +6,6 @@ import com.credits.client.node.thrift.generated.*;
 import com.credits.general.thrift.generated.Amount;
 import com.credits.general.util.GeneralConverter;
 import com.credits.general.util.exception.ConverterException;
-import com.credits.general.util.variant.VariantConverter;
 
 import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
@@ -243,15 +242,10 @@ public class NodePojoConverter {
     }
 
     public static SmartContractInvocation toSmartContractInvocation(SmartContractInvocationData invocationData) {
-        final var variantParams = invocationData.getParams()
-                .stream()
-                .map(VariantConverter::toVariant)
-                .collect(toList());
-
         final List<ByteBuffer> usedContracts = toByteBufferUsedContracts(invocationData.getUsedContracts());
 
         return new SmartContractInvocation(invocationData.getMethod(),
-                                           variantParams,
+                                           invocationData.getParams(),
                                            usedContracts,
                                            invocationData.isForgetNewState(),
                                            SMART_CONTRACT_INVOCATION_VERSION);
