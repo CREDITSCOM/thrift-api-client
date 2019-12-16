@@ -253,6 +253,7 @@ public class NodeApiServiceImpl implements NodeApiService {
                                                             amount,
                                                             shortFee,
                                                             userData,
+                                                            delegationOptions,
                                                             decodedUsedContracts);
         signTransaction(transactionData, privateKey);
 

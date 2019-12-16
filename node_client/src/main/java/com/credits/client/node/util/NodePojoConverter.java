@@ -8,6 +8,7 @@ import com.credits.general.util.GeneralConverter;
 import com.credits.general.util.exception.ConverterException;
 import com.credits.general.util.variant.VariantConverter;
 
+import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
 import java.nio.ByteBuffer;
 import java.util.Collections;
@@ -17,6 +18,7 @@ import java.util.Locale;
 import static com.credits.client.node.pojo.SmartContractInvocationData.SMART_CONTRACT_INVOCATION_VERSION;
 import static com.credits.general.util.GeneralConverter.*;
 import static com.credits.general.util.GeneralPojoConverter.createApiResponseData;
+import static com.credits.general.util.Utils.rethrowUnchecked;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
@@ -317,13 +319,52 @@ public class NodePojoConverter {
         transaction.target = ByteBuffer.wrap(transactionData.getTarget());
         transaction.amount = bigDecimalToAmount(transactionData.getAmount());
         transaction.fee = new AmountCommission(transactionData.getOfferedMaxFee16Bits());
-        if (transactionData.getCommentBytes() != null) {
-            transaction.userFields = ByteBuffer.wrap(transactionData.getCommentBytes());
-        }
-        if (transactionData.getSignature() != null) {
-            transaction.signature = ByteBuffer.wrap(transactionData.getSignature());
-        }
+        transaction.userFields = getUserFields(transactionData);
+        transaction.signature = transactionData.getSignature() != null ? ByteBuffer.wrap(transactionData.getSignature()) : null;
         return transaction;
+    }
+
+    private static final byte UF_TYPE_INTEGER = 1;
+    private static final byte UF_TYPE_STRING = 2;
+
+    private static ByteBuffer getUserFields(TransactionFlowData transactionData) {
+        final var isCommentExist = transactionData.getCommentBytes() != null;
+        final var isDelegateOptionsExist = transactionData.getDelegationOptions() != 0;
+        final var ufBytes = new ByteArrayOutputStream();
+
+        rethrowUnchecked(() -> {
+            if (isDelegateOptionsExist) {
+                final var markByte = 0;
+                final var amountUserFields = isCommentExist ? 2 : 1;
+                final var ufNumber = 5;
+                final var ufType = UF_TYPE_INTEGER;
+                final var ufValue = ((long) transactionData.getDelegationOptions());
+
+                ufBytes.write(toByteArrayLittleEndian(markByte, Integer.BYTES));
+                ufBytes.write(toByteArrayLittleEndian(amountUserFields, Integer.BYTES));
+                ufBytes.write(toByteArrayLittleEndian(ufNumber, Integer.BYTES));
+                ufBytes.write(toByteArrayLittleEndian(ufType, Byte.BYTES));
+                ufBytes.write(toByteArrayLittleEndian(ufValue, Long.BYTES));
+
+                if (isCommentExist) {
+                    final var ufNumber2 = 6;
+                    final var ufType2 = UF_TYPE_STRING;
+                    final var ufStringLength = transactionData.getCommentBytes().length;
+                    final var ufValue2 = transactionData.getCommentBytes();
+
+                    ufBytes.write(toByteArrayLittleEndian(ufNumber2, Integer.BYTES));
+                    ufBytes.write(toByteArrayLittleEndian(ufType2, Byte.BYTES));
+                    ufBytes.write(toByteArrayLittleEndian(ufStringLength, Integer.BYTES));
+                    ufBytes.write(ufValue2);
+                }
+            } else {
+                if (isCommentExist) {
+                    ufBytes.write(transactionData.getCommentBytes());
+                }
+            }
+        });
+
+        return ByteBuffer.wrap(ufBytes.toByteArray());
     }
 
     public static Transaction toTransaction(TransactionFlowData transactionData, SmartContractInvocation smartContractInvocation) {

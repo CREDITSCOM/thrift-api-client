@@ -102,7 +102,6 @@ public class SignUtils {
                 os.write(printBytes("comment", GeneralConverter.toByteArrayLittleEndian(commentBytes, commentBytes.length)));
             }
             if(isDelegateTransaction){
-                os.write(printBytes("delegateOptionsLen", GeneralConverter.toByteArrayLittleEndian(4, 4)));
                 os.write(printBytes("delegateOptions", GeneralConverter.toByteArrayLittleEndian(tStruct.getDelegationOptions(), 4)));
             }
         } catch (IOException e) {
