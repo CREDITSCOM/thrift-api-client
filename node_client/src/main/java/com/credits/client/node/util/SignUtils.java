@@ -97,12 +97,12 @@ public class SignUtils {
                 os.write(printBytes("smartContractLen", GeneralConverter.toByteArrayLittleEndian(smartContractLen, 4)));
                 os.write(printBytes("smartContract", GeneralConverter.toByteArrayLittleEndian(tStruct.getSmartContractBytes(), smartContractLen)));
             }
+            if(isDelegateTransaction){
+                os.write(printBytes("delegateOptions", GeneralConverter.toByteArrayLittleEndian(tStruct.getDelegationOptions(), 8)));
+            }
             if (isCommentBytesExists) {
                 os.write(printBytes("commentLen", GeneralConverter.toByteArrayLittleEndian(commentBytes.length, 4)));
                 os.write(printBytes("comment", GeneralConverter.toByteArrayLittleEndian(commentBytes, commentBytes.length)));
-            }
-            if(isDelegateTransaction){
-                os.write(printBytes("delegateOptions", GeneralConverter.toByteArrayLittleEndian(tStruct.getDelegationOptions(), 4)));
             }
         } catch (IOException e) {
             // do nothing - never happen

@@ -328,26 +328,24 @@ public class NodePojoConverter {
 
         rethrowUnchecked(() -> {
             if (isDelegateOptionsExist) {
-                final var markByte = 0;
-                final var amountUserFields = isCommentExist ? 2 : 1;
-                final var ufNumber = 5;
-                final var ufType = UF_TYPE_INTEGER;
-                final var ufValue = ((long) transactionData.getDelegationOptions());
+                final byte markByte = 0;
+                final byte amountUserFields = (byte) (isCommentExist ? 2 : 1);
+                final int ufNumber = 5;
+                final long ufValue = transactionData.getDelegationOptions();
 
-                ufBytes.write(toByteArrayLittleEndian(markByte, Integer.BYTES));
-                ufBytes.write(toByteArrayLittleEndian(amountUserFields, Integer.BYTES));
+                ufBytes.write(markByte);
+                ufBytes.write(amountUserFields);
                 ufBytes.write(toByteArrayLittleEndian(ufNumber, Integer.BYTES));
-                ufBytes.write(toByteArrayLittleEndian(ufType, Byte.BYTES));
+                ufBytes.write(UF_TYPE_INTEGER);
                 ufBytes.write(toByteArrayLittleEndian(ufValue, Long.BYTES));
 
                 if (isCommentExist) {
-                    final var ufNumber2 = 6;
-                    final var ufType2 = UF_TYPE_STRING;
-                    final var ufStringLength = transactionData.getCommentBytes().length;
-                    final var ufValue2 = transactionData.getCommentBytes();
+                    final int ufNumber2 = 6;
+                    final int ufStringLength = transactionData.getCommentBytes().length;
+                    final byte[] ufValue2 = transactionData.getCommentBytes();
 
                     ufBytes.write(toByteArrayLittleEndian(ufNumber2, Integer.BYTES));
-                    ufBytes.write(toByteArrayLittleEndian(ufType2, Byte.BYTES));
+                    ufBytes.write(UF_TYPE_STRING);
                     ufBytes.write(toByteArrayLittleEndian(ufStringLength, Integer.BYTES));
                     ufBytes.write(ufValue2);
                 }
