@@ -82,4 +82,16 @@ public interface NodeApiService {
                                                         byte[] userData,
                                                         int delegationOptions,
                                                         PrivateKey privateKey) throws NodeClientException;
+
+    TransactionFlowData signAndGetTransactionFlowData(long innerId,
+                                                      String sender,
+                                                      String receiver,
+                                                      BigDecimal amount,
+                                                      float fee,
+                                                      List<String> usedContracts,
+                                                      byte[] userData,
+                                                      int delegationOptions,
+                                                      PrivateKey privateKey) throws NodeClientException;
+
+    TransactionFlowResultData justSubmitTransferTransaction(TransactionFlowData transactionData) throws NodeClientException;
 }

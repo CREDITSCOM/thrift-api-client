@@ -262,6 +262,37 @@ public class NodeApiServiceImpl implements NodeApiService {
 
     }
 
+    public TransactionFlowData signAndGetTransactionFlowData(long innerId,
+                                                      String sender,
+                                                      String receiver,
+                                                      BigDecimal amount,
+                                                      float fee,
+                                                      List<String> usedContracts,
+                                                      byte[] userData,
+                                                      int delegationOptions,
+                                                      PrivateKey privateKey) throws NodeClientException {
+
+        final var decodedSender = decodeFromBASE58(sender);
+        final var decodedReceiver = decodeFromBASE58(receiver);
+        final var decodedUsedContracts = toByteBufferUsedContracts(usedContracts);
+        final var shortFee = calculateActualFee((double) fee).getRight();
+        final var transactionData = new TransactionFlowData(innerId,
+                decodedSender,
+                decodedReceiver,
+                amount,
+                shortFee,
+                userData,
+                delegationOptions,
+                decodedUsedContracts);
+        signTransaction(transactionData, privateKey);
+        return transactionData;
+    }
+
+    public TransactionFlowResultData justSubmitTransferTransaction(TransactionFlowData transactionData) throws NodeClientException {
+        final var transaction = toTransaction(transactionData);
+        return callTransactionFlow(transaction);
+    }
+
     private TransactionFlowResultData callTransactionFlow(Transaction transaction) {
         final var result = nodeClient.transactionFlow(transaction);
         processApiResponse(result.getStatus());
