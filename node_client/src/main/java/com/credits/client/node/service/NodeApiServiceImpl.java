@@ -192,7 +192,7 @@ public class NodeApiServiceImpl implements NodeApiService {
                                                             serializedContract,
                                                             decodedUsedContracts);
         signTransaction(transactionData, privateKey);
-
+//next line has error: serialized contract is placed to userData
         final var transaction = toTransaction(transactionData, contractInvocation);
         return callTransactionFlow(transaction);
     }
