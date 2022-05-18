@@ -161,9 +161,18 @@ public class NodeApiServiceImpl implements NodeApiService {
                                                             shortFee,
                                                             serializedContract,
                                                             decodedUsedContracts); //todo decodedContracts created twice
+        final var zByte =  new byte[0];
+        final var transactionDataToSend = new TransactionFlowData(innerId,
+                                                            decodedSender,
+                                                            decodedReceiver,
+                                                            ZERO,
+                                                            shortFee,
+                                                            zByte,
+                                                            decodedUsedContracts);
         signTransaction(transactionData, privateKey);
-
-        final var transaction = toTransaction(transactionData, smartContractDeploy);
+        transactionDataToSend.setSignature(transactionData.getSignature());
+        LOGGER.debug("Contract transaction Signature", transactionDataToSend.getSignature().toString());
+        final var transaction = toTransaction(transactionDataToSend, smartContractDeploy);
         return callTransactionFlow(transaction);
     }
 
@@ -191,9 +200,18 @@ public class NodeApiServiceImpl implements NodeApiService {
                                                             shortFee,
                                                             serializedContract,
                                                             decodedUsedContracts);
+        final var zByte =  new byte[0];
+        final var transactionDataToSend = new TransactionFlowData(innerId,
+                                                            decodedSender,
+                                                            decodedReceiver,
+                                                            ZERO,
+                                                            shortFee,
+                                                            zByte,
+                                                            decodedUsedContracts);
         signTransaction(transactionData, privateKey);
-//next line has error: serialized contract is placed to userData
-        final var transaction = toTransaction(transactionData, contractInvocation);
+        transactionDataToSend.setSignature(transactionData.getSignature());
+        LOGGER.debug("Contract transaction Signature", transactionDataToSend.getSignature().toString());
+        final var transaction = toTransaction(transactionDataToSend, contractInvocation);
         return callTransactionFlow(transaction);
     }
 

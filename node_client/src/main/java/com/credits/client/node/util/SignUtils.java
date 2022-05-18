@@ -28,6 +28,7 @@ public class SignUtils {
             byte[] tArr = printBytes("Transaction structure", getBytes(tStruct));
             byte[] signatureArr = Ed25519.sign(tArr, privateKey);
             signature = ByteBuffer.wrap(signatureArr);
+            printBytes("Transaction signature", signatureArr);
 
         } catch (Exception e) {
             LOGGER.error("Sign transaction is failed");
