@@ -5,35 +5,40 @@ import com.credits.client.node.pojo.WalletData;
 import com.credits.client.node.pojo.*;
 import com.credits.client.node.thrift.generated.*;
 import com.credits.client.node.util.NodePojoConverter;
-import com.credits.client.node.util.Validator;
+import com.credits.general.pojo.ByteCodeObjectData;
 import com.credits.general.thrift.generated.Amount;
 import com.credits.general.util.Callback;
 import com.credits.general.util.Function;
+import com.credits.general.util.GeneralConverter;
 import com.credits.general.util.exception.ConverterException;
-import org.apache.commons.lang3.tuple.Pair;
+import com.credits.general.util.variant.VariantConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.nio.ByteBuffer;
+import java.security.PrivateKey;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.BiConsumer;
-import java.util.stream.Collectors;
 
-import static com.credits.client.node.util.NodeClientUtils.logApiResponse;
-import static com.credits.client.node.util.NodeClientUtils.processApiResponse;
+import static com.credits.client.node.pojo.SmartContractInvocationData.SMART_CONTRACT_INVOCATION_VERSION;
+import static com.credits.client.node.util.NodeClientUtils.*;
 import static com.credits.client.node.util.NodePojoConverter.*;
+import static com.credits.client.node.util.SignUtils.signTransaction;
+import static com.credits.general.util.Callback.handleCallback;
 import static com.credits.general.util.GeneralConverter.*;
+import static com.credits.general.util.Utils.calculateActualFee;
 import static com.credits.general.util.Utils.threadPool;
+import static java.math.BigDecimal.ZERO;
+import static java.util.stream.Collectors.toList;
 
 public class NodeApiServiceImpl implements NodeApiService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NodeApiServiceImpl.class);
     private static AtomicReference<NodeApiServiceImpl> instance = new AtomicReference<>();
-    public NodeThriftApiClient nodeClient;
+    public final NodeThriftApiClient nodeClient;
 
     private NodeApiServiceImpl(String host, int port) {
         nodeClient = NodeThriftApiClient.getInstance(host, port);
@@ -55,73 +60,42 @@ public class NodeApiServiceImpl implements NodeApiService {
 
     @Override
     public BigDecimal getBalance(String address) throws NodeClientException, ConverterException {
-        LOGGER.info(String.format("getBalance: ---> address = %s", address));
+        LOGGER.info(String.format("WalletBalanceGet(%s) ---> ", address));
         WalletBalanceGetResult result = nodeClient.getBalance(decodeFromBASE58(address));
         processApiResponse(result.getStatus());
         Amount amount = result.getBalance();
         BigDecimal balance = amountToBigDecimal(amount);
-        LOGGER.info(String.format("getBalance: <--- balance = %s", balance));
+        LOGGER.info(String.format("WalletBalanceGet: <--- balance = %s", balance));
         return balance;
     }
 
     @Override
-    public Pair<Integer, Long> getBlockAndSynchronizePercent() throws NodeClientException, ConverterException {
+    public SyncStateInfoData getSyncStateInfo() throws NodeClientException, ConverterException {
+        LOGGER.info("SyncStateGet ---> ");
         SyncStateResult result = nodeClient.getSync();
         processApiResponse(result.getStatus());
-        long currRound = result.getCurrRound();
-        long lastBlock = result.getLastBlock();
-/*
-        LOGGER.debug("Last round is " + String.valueOf(currRound));
-        LOGGER.debug("Synchronized round is " + String.valueOf(lastBlock));
-*/
-        if (lastBlock == 0) {
-            return Pair.of(0, 0L);
-        }
-        int i = (int) ((lastBlock * 100.0f) / currRound);
-        if (i > 100) {
-            return Pair.of(0, currRound);
-        }
-        if (i == 99) {
-            return Pair.of(100, currRound);
-        }
-        return Pair.of(i, currRound);
+        final var currentBlock = result.getCurrRound();
+        final var lastBlock = result.getLastBlock();
+        final var syncStateInfoData = new SyncStateInfoData(currentBlock, lastBlock);
+        LOGGER.debug("SyncStateGet: <-- {}", syncStateInfoData);
+        return syncStateInfoData;
     }
 
-
     @Override
-    public List<TransactionData> getTransactions(String address, long offset, long limit)
+    public TransactionListByAddressData getTransactionList(String address, long offset, long limit)
     throws NodeClientException, ConverterException {
-        LOGGER.info(
-                String.format("getTransactions: ---> address = %s, offset = %d, limit = %d", address, offset, limit));
-        TransactionsGetResult result = nodeClient.getTransactions(decodeFromBASE58(address), offset, limit);
+        LOGGER.info("getTransactionsAndAmount: ---> address = {}, offset = {}, limit = {}", address, offset, limit);
+        final var result = nodeClient.getTransactions(decodeFromBASE58(address), offset, limit);
         processApiResponse(result.getStatus());
-        List<TransactionData> transactionDataList = new ArrayList<>();
+        final var amountTransactions = result.total_trxns_count;
+        final var transactionDataList = new ArrayList<TransactionData>();
         for (SealedTransaction sealedTransaction : result.getTransactions()) {
             transactionDataList.add(createTransactionData(sealedTransaction));
         }
-        LOGGER.info(String.format("getTransactions: <--- address = %s, transactions count = %d", address,
-                                  transactionDataList.size()));
-        return transactionDataList;
-    }
-
-    @Override
-    public List<SmartContractTransactionData> getSmartContractTransactions(String address, long offset, long limit)
-    throws NodeClientException, ConverterException {
-        LOGGER.info(
-                String.format("getTransactions: ---> address = %s, offset = %d, limit = %d", address, offset, limit));
-        TransactionsGetResult result = nodeClient.getTransactions(decodeFromBASE58(address), offset, limit);
-        processApiResponse(result.getStatus());
-        List<SmartContractTransactionData> dataList = new ArrayList<>();
-        for (SealedTransaction sealedTransaction : result.getTransactions()) {
-            try {
-                dataList.add(createSmartContractTransactionData(sealedTransaction));
-            } catch (RuntimeException ignored) {
-                LOGGER.warn("Exception into createSmartContractTransactionData({})", sealedTransaction);
-            }
-        }
-        LOGGER.info(String.format("getTransactions: <--- address = %s, transactions count = %d", address,
-                                  dataList.size()));
-        return dataList;
+        LOGGER.info("getTransactionsAndAmount: <--- address = {}, receivedTransactionsCount = {} amountTotalTransactions = {}",
+                    address,
+                    transactionDataList.size(), amountTransactions);
+        return new TransactionListByAddressData(amountTransactions, transactionDataList);
     }
 
 
@@ -164,135 +138,292 @@ public class NodeApiServiceImpl implements NodeApiService {
     }
 
     @Override
-    public TransactionFlowResultData smartContractTransactionFlow(SmartContractTransactionFlowData scTransaction)
-    throws NodeClientException, ConverterException {
-        Validator.validate(scTransaction);
-        Transaction transaction = smartContractTransactionFlowDataToTransaction(scTransaction);
-        LOGGER.debug(
-                "smartContractTransactionFlow -> \nsource - {} \ntarget - {} \ninnerId - {} \namount - {} \nscMethod - {} \nscParams - {}",
-                encodeToBASE58(transaction.source.array()),
-                encodeToBASE58(transaction.target.array()),
-                transaction.getId(),
-                transaction.getAmount(),
-                transaction.smartContract.getMethod(),
-                transaction.smartContract.getParams());
-        TransactionFlowResultData response = callTransactionFlow(transaction);
-        LOGGER.debug("smartContractTransactionFlow <- \nsource - {} \ntarget - {} \ncode - {}, \nmessage - {}, \nscResult - {}",
-                     response.getSource(),
-                     response.getTarget(),
-                     response.getCode(),
-                     response.getMessage(),
-                     response.getContractResult());
-        return response;
+    public TransactionFlowResultData submitDeployTransaction(long innerId,
+                                                             String initiator,
+                                                             String contractAddress,
+                                                             String sourceCode,
+                                                             List<ByteCodeObjectData> byteCodeObjects,
+                                                             int tokenStandardId,
+                                                             float fee,
+                                                             List<String> usedContracts,
+                                                             PrivateKey privateKey) {
+        final var decodedSender = decodeFromBASE58(initiator);
+        final var decodedReceiver = decodeFromBASE58(contractAddress);
+        final var decodedUsedContracts = toByteBufferUsedContracts(usedContracts);
+        final var shortFee = calculateActualFee((double) fee).getRight();
+        final var deployData = new SmartContractDeployData(sourceCode, byteCodeObjects, tokenStandardId);
+        final var smartContractDeploy = toSmartContractInvocation(deployData, usedContracts);
+        final var serializedContract = serializeThriftStructure(smartContractDeploy);
+        final var transactionData = new TransactionFlowData(innerId,
+                                                            decodedSender,
+                                                            decodedReceiver,
+                                                            ZERO,
+                                                            shortFee,
+                                                            serializedContract,
+                                                            decodedUsedContracts); //todo decodedContracts created twice
+        final var zByte =  new byte[0];
+        final var transactionDataToSend = new TransactionFlowData(innerId,
+                                                            decodedSender,
+                                                            decodedReceiver,
+                                                            ZERO,
+                                                            shortFee,
+                                                            zByte,
+                                                            decodedUsedContracts);
+        signTransaction(transactionData, privateKey);
+        transactionDataToSend.setSignature(transactionData.getSignature());
+        LOGGER.debug("Contract transaction Signature", transactionDataToSend.getSignature().toString());
+        final var transaction = toTransaction(transactionDataToSend, smartContractDeploy);
+        return callTransactionFlow(transaction);
     }
 
     @Override
-    public TransactionFlowResultData transactionFlow(TransactionFlowData transactionFlowData) {
-        Validator.validate(transactionFlowData);
-        Transaction transaction = transactionFlowDataToTransaction(transactionFlowData);
-        LOGGER.debug(
-                "smartContractTransactionFlow -> \nsource - {} \ntarget - {} \ninnerId - {} \namount - {}",
-                encodeToBASE58(transaction.source.array()),
-                encodeToBASE58(transaction.target.array()),
-                transaction.getId(),
-                transaction.getAmount());
-        TransactionFlowResultData response = callTransactionFlow(transaction);
-        LOGGER.debug("smartContractTransactionFlow <- \nsource - {} \ntarget - {} \ncode - {}, \nmessage - {}",
-                     response.getSource(),
-                     response.getTarget(),
-                     response.getCode(),
-                     response.getMessage());
-        return response;
+    public TransactionFlowResultData submitInvokeTransaction(long innerId,
+                                                             String initiator,
+                                                             String contractAddress,
+                                                             String method,
+                                                             List<?> params,
+                                                             float fee,
+                                                             List<String> usedContracts,
+                                                             PrivateKey privateKey) {
+        final var decodedSender = decodeFromBASE58(initiator);
+        final var decodedReceiver = decodeFromBASE58(contractAddress);
+        final var decodedUsedContracts = toByteBufferUsedContracts(usedContracts);
+        final var shortFee = calculateActualFee((double) fee).getRight();
+        final var variantParams = params.stream().map(VariantConverter::toVariant).collect(toList());
+        final var contractInvocationData = new SmartContractInvocationData(method, variantParams, usedContracts, false);
+        final var contractInvocation = toSmartContractInvocation(contractInvocationData);
+        final var serializedContract = serializeByThrift(contractInvocation);
+        final var transactionData = new TransactionFlowData(innerId,
+                                                            decodedSender,
+                                                            decodedReceiver,
+                                                            ZERO,
+                                                            shortFee,
+                                                            serializedContract,
+                                                            decodedUsedContracts);
+        final var zByte =  new byte[0];
+        final var transactionDataToSend = new TransactionFlowData(innerId,
+                                                            decodedSender,
+                                                            decodedReceiver,
+                                                            ZERO,
+                                                            shortFee,
+                                                            zByte,
+                                                            decodedUsedContracts);
+        signTransaction(transactionData, privateKey);
+        transactionDataToSend.setSignature(transactionData.getSignature());
+        LOGGER.debug("Contract transaction Signature", transactionDataToSend.getSignature().toString());
+        final var transaction = toTransaction(transactionDataToSend, contractInvocation);
+        return callTransactionFlow(transaction);
+    }
+
+
+    @Override
+    public TransactionFlowResultData invokeContractGetterMethod(String initiator,
+                                                                String contractAddress,
+                                                                String method,
+                                                                List<?> params,
+                                                                List<String> usedContracts) throws NodeClientException {
+        final var decodedSender = decodeFromBASE58(initiator);
+        final var decodedReceiver = decodeFromBASE58(contractAddress);
+        final var decodedUsedContracts = toByteBufferUsedContracts(usedContracts);
+        final var variantParams = params.stream().map(VariantConverter::toVariant).collect(toList());
+        final var contract = new SmartContractInvocation(method, variantParams, decodedUsedContracts, true, SMART_CONTRACT_INVOCATION_VERSION);
+        final var serializedContract = serializeThriftStructure(contract);
+        final var transactionData = new TransactionFlowData(0,
+                                                            decodedSender,
+                                                            decodedReceiver,
+                                                            ZERO,
+                                                            (short) 17510, //0.01
+                                                            serializedContract,
+                                                            decodedUsedContracts);
+        final var transaction = toTransaction(transactionData, contract);
+        return callTransactionFlow(transaction);
+    }
+
+    @Override
+    public TransactionFlowResultData submitTransferTransaction(long innerId,
+                                                               String sender,
+                                                               String receiver,
+                                                               BigDecimal amount,
+                                                               float fee,
+                                                               List<String> usedContracts,
+                                                               byte[] userData,
+                                                               PrivateKey privateKey) {
+        return submitTransferTransaction(innerId, sender, receiver, amount, fee, usedContracts, userData, 0, privateKey);
+    }
+
+    @Override
+    public TransactionFlowResultData submitTransferTransaction(long innerId,
+                                                               String sender,
+                                                               String receiver,
+                                                               BigDecimal amount,
+                                                               float fee,
+                                                               List<String> usedContracts,
+                                                               byte[] userData,
+                                                               int delegationOptions,
+                                                               PrivateKey privateKey) throws NodeClientException {
+        final var decodedSender = decodeFromBASE58(sender);
+        final var decodedReceiver = decodeFromBASE58(receiver);
+        final var decodedUsedContracts = toByteBufferUsedContracts(usedContracts);
+        final var shortFee = calculateActualFee((double) fee).getRight();
+        final var transactionData = new TransactionFlowData(innerId,
+                                                            decodedSender,
+                                                            decodedReceiver,
+                                                            amount,
+                                                            shortFee,
+                                                            userData,
+                                                            delegationOptions,
+                                                            decodedUsedContracts);
+        signTransaction(transactionData, privateKey);
+
+        final var transaction = toTransaction(transactionData);
+        return callTransactionFlow(transaction);
+
+    }
+
+    public TransactionFlowData signAndGetTransactionFlowData(long innerId,
+                                                      String sender,
+                                                      String receiver,
+                                                      BigDecimal amount,
+                                                      float fee,
+                                                      List<String> usedContracts,
+                                                      byte[] userData,
+                                                      int delegationOptions,
+                                                      PrivateKey privateKey) throws NodeClientException {
+
+        final var decodedSender = decodeFromBASE58(sender);
+        final var decodedReceiver = decodeFromBASE58(receiver);
+        final var decodedUsedContracts = toByteBufferUsedContracts(usedContracts);
+        final var shortFee = calculateActualFee((double) fee).getRight();
+        final var transactionData = new TransactionFlowData(innerId,
+                decodedSender,
+                decodedReceiver,
+                amount,
+                shortFee,
+                userData,
+                delegationOptions,
+                decodedUsedContracts);
+        signTransaction(transactionData, privateKey);
+        return transactionData;
+    }
+
+    public TransactionFlowResultData justSubmitTransferTransaction(TransactionFlowData transactionData) throws NodeClientException {
+        final var transaction = toTransaction(transactionData);
+        return callTransactionFlow(transaction);
     }
 
     private TransactionFlowResultData callTransactionFlow(Transaction transaction) {
-        TransactionFlowResult result = nodeClient.transactionFlow(transaction);
-//        logApiResponse(result.getStatus());
+        final var result = nodeClient.transactionFlow(transaction);
         processApiResponse(result.getStatus());
-        return transactionFlowResultToTransactionFlowResultData(result, transaction.getSource(),
-                                                                transaction.getTarget());
+        return toTransactionFlowResultData(result, transaction.getSource(), transaction.getTarget());
     }
 
 
     @Override
     public SmartContractData getSmartContract(String address) throws NodeClientException, ConverterException {
         LOGGER.info(String.format("---> address = %s", address));
-        SmartContractGetResult result = nodeClient.getSmartContract(decodeFromBASE58(address));
+        final var result = nodeClient.getSmartContract(decodeFromBASE58(address));
         logApiResponse(result.getStatus());
         processApiResponse(result.getStatus());
         SmartContract smartContract = result.getSmartContract();
-        SmartContractData smartContractData = smartContractToSmartContractData(smartContract);
-        LOGGER.info(String.format(
-                "<--- smart executor hashState = %s",
-                smartContractData.getSmartContractDeployData().getHashState()));
+        SmartContractData smartContractData = toSmartContractData(smartContract);
+        LOGGER.info(String.format("<--- smart executor hashState = %s", smartContractData.getSmartContractDeployData().hashCode()));
         return smartContractData;
     }
 
     @Override
-    public List<SmartContractData> getSmartContracts(String address) throws NodeClientException, ConverterException {
+    public SmartContractListByAddressData getSmartContractList(String address) throws NodeClientException, ConverterException {
         LOGGER.info(String.format("---> wallet address = %s", address));
-        SmartContractsListGetResult result = nodeClient.getSmartContracts(decodeFromBASE58(address));
+        final var result = nodeClient.getSmartContracts(decodeFromBASE58(address));
         logApiResponse(result.getStatus());
         processApiResponse(result.getStatus());
         LOGGER.info("<--- smart contracts size = {}", result.getSmartContractsList().size());
-        return result.getSmartContractsList()
+
+        final var totalSmartContracts = result.getCount();
+        final var smartContractList = result.getSmartContractsList()
                 .stream()
-                .map(NodePojoConverter::smartContractToSmartContractData)
-                .collect(Collectors.toList());
+                .map(NodePojoConverter::toSmartContractData)
+                .collect(toList());
+        return new SmartContractListByAddressData(totalSmartContracts, smartContractList);
     }
 
     @Override
-    public List<ByteBuffer> getSmartContractAddresses(String address) throws NodeClientException, ConverterException {
+    public List<String> getSmartContractAddressList(String address) throws NodeClientException, ConverterException {
         SmartContractAddressesListGetResult result = nodeClient.getSmartContractAddresses(decodeFromBASE58(address));
         logApiResponse(result.getStatus());
         processApiResponse(result.getStatus());
-        return result.getAddressesList();
+        return result.getAddressesList()
+                .stream()
+                .map(ByteBuffer::array)
+                .map(GeneralConverter::encodeToBASE58)
+                .collect(toList());
     }
 
     @Override
     public WalletData getWalletData(String address) throws NodeClientException, ConverterException {
+        LOGGER.debug("--->  WalletDataGet {}", address);
         WalletDataGetResult result = nodeClient.getWalletData(decodeFromBASE58(address));
         processApiResponse(result.getStatus());
+        LOGGER.debug("<---  WalletDataGet = {}", result);
         return walletToWalletData(result.getWalletData());
     }
 
     @Override
-    public Integer getWalletId(String address) throws NodeClientException, ConverterException {
-        WalletIdGetResult result = nodeClient.getWalletId(decodeFromBASE58(address));
+    public int getWalletId(String address) throws NodeClientException, ConverterException {
+        LOGGER.debug("--->  get wallet id for address {}", address);
+        final var result = nodeClient.getWalletId(decodeFromBASE58(address));
         processApiResponse(result.getStatus());
-        LOGGER.debug("<---  get wallet id {}", result.getWalletId());
+        LOGGER.debug("<---  get wallet id for address {} = {}", address, result.getWalletId());
         return result.getWalletId();
     }
 
     @Override
-    public Long getWalletTransactionsCount(String address) throws NodeClientException, ConverterException {
+    public long getWalletTransactionsCount(String address) throws NodeClientException, ConverterException {
         WalletTransactionsCountGetResult result = nodeClient.getWalletTransactionsCount(decodeFromBASE58(address));
         processApiResponse(result.getStatus());
         return result.getLastTransactionInnerId();
     }
 
     @Override
-    @Deprecated
-    public TransactionsStateGetResultData getTransactionsState(String address, List<Long> transactionIdList)
-    throws NodeClientException, ConverterException {
-        TransactionsStateGetResult transactionsStateGetResult =
-                nodeClient.getTransactionsState(decodeFromBASE58(address), transactionIdList);
-        processApiResponse(transactionsStateGetResult.getStatus());
-        return NodePojoConverter.createTransactionsStateGetResultData(transactionsStateGetResult);
+    public List<TransactionData> getTransactionsListFromPool(long poolNumber,
+                                                             long offset,
+                                                             long limit) throws NodeClientException, ConverterException {
+        final var response = nodeClient.getTransactionsFromPool(poolNumber, offset, limit);
+        processApiResponse(response.getStatus());
+        return response.getTransactions().stream().map(NodePojoConverter::createTransactionData).collect(toList());
     }
+
+    @Override
+    public ModifiedInnerIdSenderReceiver modifyInnerIdSenderReceiver(long innerId, String sender, String receiver) {
+        var senderIndexExistsBit = 0L;
+        var receiverIndexExistBit = 0L;
+
+        if(sender != null) {
+            final var senderAddressId = getWalletId(sender);
+            if (senderAddressId != 0) {
+                sender = encodeToBASE58(toByteArrayLittleEndian(senderAddressId, 4));
+                senderIndexExistsBit = 1L << 47;
+            }
+        }
+
+        if(receiver != null) {
+            final var receiverAddressId = getWalletId(receiver);
+            if (receiverAddressId != 0) {
+                receiver = encodeToBASE58(toByteArrayLittleEndian(receiverAddressId, 4));
+                receiverIndexExistBit = 1L << 46;
+            }
+        }
+
+        final var newInnerId = (innerId & (-1 >> 18)) | senderIndexExistsBit | receiverIndexExistBit;
+
+        return new ModifiedInnerIdSenderReceiver(newInnerId, sender, receiver);
+    }
+
 
     public static <R> void async(Function<R> apiCall, Callback<R> callback) {
         CompletableFuture.supplyAsync(apiCall::apply, threadPool).whenComplete(handleCallback(callback));
     }
 
-    public static <R> BiConsumer<R, Throwable> handleCallback(Callback<R> callback) {
-        return (result, error) -> {
-            if (error == null) {
-                callback.onSuccess(result);
-            } else {
-                callback.onError(error);
-            }
-        };
+    public static <R> CompletableFuture<R> async(Function<R> apiCall) {
+        return CompletableFuture.supplyAsync(apiCall::apply, threadPool);
     }
-
 }

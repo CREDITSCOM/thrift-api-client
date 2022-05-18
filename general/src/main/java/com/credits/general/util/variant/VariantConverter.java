@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import static com.credits.general.serialize.Serializer.deserialize;
 import static com.credits.general.serialize.Serializer.serialize;
 import static com.credits.general.thrift.generated.Variant._Fields.*;
+import static com.credits.general.util.Utils.getClassType;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
@@ -24,6 +25,10 @@ public class VariantConverter {
 
     public static Variant toVariant(String classType, Object object) {
         return new ObjectToVariantConverter().apply(requireNonNull(classType, "classType can't be null"), object);
+    }
+
+    public static Variant toVariant(Object object) {
+        return new ObjectToVariantConverter().apply(getClassType(object), object);
     }
 
     public static Object toObject(Variant variant, ClassLoader... classLoader) {

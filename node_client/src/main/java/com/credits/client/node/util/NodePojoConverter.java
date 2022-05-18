@@ -7,15 +7,19 @@ import com.credits.general.thrift.generated.Amount;
 import com.credits.general.util.GeneralConverter;
 import com.credits.general.util.exception.ConverterException;
 
+import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
 import java.nio.ByteBuffer;
+import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
-import java.util.stream.Collectors;
 
 import static com.credits.client.node.pojo.SmartContractInvocationData.SMART_CONTRACT_INVOCATION_VERSION;
-import static com.credits.general.util.GeneralConverter.amountToBigDecimal;
-import static com.credits.general.util.GeneralConverter.bigDecimalToAmount;
+import static com.credits.general.util.GeneralConverter.*;
 import static com.credits.general.util.GeneralPojoConverter.createApiResponseData;
+import static com.credits.general.util.Utils.rethrowUnchecked;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 
 
 public class NodePojoConverter {
@@ -46,11 +50,11 @@ public class NodePojoConverter {
         Transaction transaction = sealedTransaction.getTrxn();
 
         TransactionData data = new TransactionData();
-        Long innerId = transaction.getId();
-        data.setBlockId(blockTransactionId.getPoolSeq() + "." + blockTransactionId.getIndex());
+        long innerId = transaction.getId();
+        data.setBlockNumber(blockTransactionId.getPoolSeq());
+        data.setIndexIntoBlock(blockTransactionId.getIndex());
         data.setAmount(amountToBigDecimal(transaction.getAmount()));
-        data.setCurrency(transaction.getCurrency());
-        data.setId(innerId);
+        data.setInnerId(innerId);
         data.setSource(transaction.getSource());
         data.setTarget(transaction.getTarget());
         data.setCommentBytes(transaction.getUserFields());
@@ -62,8 +66,22 @@ public class NodePojoConverter {
             data.setSmartInfo(createSmartTransInfoData(transaction.getSmartInfo()));
         }
         data.setType(createTransactionTypeData(transaction.getType()));
+        data.setMaxFee(transaction.getFee().commission);
         data.setUsedContracts(transaction.getUsedContracts());
+        data.setTimeCreation(transaction.getTimeCreation());
+        final var transactionExtraFee = transaction.getExtraFee();
+        if(transactionExtraFee != null) {
+            final var extraFeeDataList = transactionExtraFee.stream().map(NodePojoConverter::toExtraFeeData).collect(toList());
+            data.setExtraFeeDataList(extraFeeDataList);
+        }
         return data;
+    }
+
+    public static ExtraFeeData toExtraFeeData(ExtraFee extraFee) {
+        final var comment = extraFee.getComment();
+        final var amount = amountToBigDecimal(extraFee.getSum());
+        final var transactionId = toTransactionIdData(extraFee.getTransactionId());
+        return new ExtraFeeData(comment, amount, transactionId);
     }
 
     public static TransactionData createTransactionData(Transaction transaction) {
@@ -74,8 +92,7 @@ public class NodePojoConverter {
         } else {
             data.setAmount(amountToBigDecimal(transaction.getAmount()));
         }
-        data.setCurrency(transaction.getCurrency());
-        data.setId(innerId);
+        data.setInnerId(innerId);
         data.setSource(transaction.getSource());
         data.setTarget(transaction.getTarget());
         data.setCommentBytes(transaction.getUserFields());
@@ -87,7 +104,7 @@ public class NodePojoConverter {
     public static WalletData walletToWalletData(com.credits.client.node.thrift.generated.WalletData walletData) {
 
         return new WalletData(walletData.getWalletId(), amountToBigDecimal(walletData.getBalance()),
-            walletData.getLastTransactionId());
+                              walletData.getLastTransactionId());
     }
 
     public static PoolData poolToPoolData(Pool pool) {
@@ -108,7 +125,7 @@ public class NodePojoConverter {
         smartContract.setAddress(smartContractData.getAddress());
         smartContract.setDeployer(smartContractData.getDeployer());
         smartContract.setSmartContractDeploy(smartContractDeployDataToSmartContractDeploy(
-            smartContractData.getSmartContractDeployData()));
+                smartContractData.getSmartContractDeployData()));
         return smartContract;
     }
 
@@ -116,23 +133,26 @@ public class NodePojoConverter {
 
         SmartContractDeploy thriftStruct = new SmartContractDeploy();
         thriftStruct.setSourceCode(data.getSourceCode());
-        thriftStruct.setByteCodeObjects(
-            GeneralConverter.byteCodeObjectsDataToByteCodeObjects(data.getByteCodeObjects()));
-        thriftStruct.setHashState(data.getHashState());
+        thriftStruct.setByteCodeObjects(byteCodeObjectsDataToByteCodeObjects(data.getByteCodeObjectDataList()));
+        thriftStruct.setHashState("");
         thriftStruct.setTokenStandard(data.getTokenStandardId());
         return thriftStruct;
     }
 
-    public static SmartContractData smartContractToSmartContractData(SmartContract smartContract) {
+    public static SmartContractData toSmartContractData(SmartContract smartContract) {
 
-        return new SmartContractData(smartContract.getAddress(), smartContract.getDeployer(),
-            createSmartContractDeployData(smartContract.getSmartContractDeploy()),
-            smartContract.getObjectState(), smartContract.getTransactionsCount());
+        return new SmartContractData(smartContract.getAddress(),
+                                     smartContract.getDeployer(),
+                                     createSmartContractDeployData(smartContract.getSmartContractDeploy()),
+                                     smartContract.getObjectState(),
+                                     smartContract.getTransactionsCount(),
+                                     smartContract.getCreateTime());
     }
 
     public static SmartContractDeployData createSmartContractDeployData(SmartContractDeploy thriftStruct) {
         return new SmartContractDeployData(thriftStruct.getSourceCode(),
-            GeneralConverter.byteCodeObjectsToByteCodeObjectsData(thriftStruct.getByteCodeObjects()), thriftStruct.getTokenStandard());
+                                           byteCodeObjectsToByteCodeObjectsData(thriftStruct.getByteCodeObjects()),
+                                           thriftStruct.getTokenStandard());
     }
 
     public static SmartTransInfoData createSmartTransInfoData(SmartTransInfo thriftStruct) {
@@ -167,21 +187,21 @@ public class NodePojoConverter {
 
     public static SmartExecutionTransInfoData createSmartExecutionTransInfoData(SmartExecutionTransInfo thriftStruct) {
         TransactionIdData stateTransaction = null;
-        if(thriftStruct.getStateTransaction()!=null) {
+        if (thriftStruct.getStateTransaction() != null) {
             stateTransaction = createTransactionIdData(thriftStruct.getStateTransaction());
         }
 
 
         return new SmartExecutionTransInfoData(thriftStruct.getMethod(),
-            thriftStruct.getParams(),
-            createSmartOperationStateData(thriftStruct.getState()),
-            stateTransaction);
+                                               thriftStruct.getParams(),
+                                               createSmartOperationStateData(thriftStruct.getState()),
+                                               stateTransaction);
     }
 
     public static SmartStateTransInfoData createSmartStateTransInfoData(SmartStateTransInfo thriftStruct) {
         return new SmartStateTransInfoData(thriftStruct.isSuccess(), amountToBigDecimal(thriftStruct.getExecutionFee()),
-            thriftStruct.getReturnValue(),
-            createTransactionIdData(thriftStruct.getStartTransaction()));
+                                           thriftStruct.getReturnValue(),
+                                           createTransactionIdData(thriftStruct.getStartTransaction()));
     }
 
     public static TokenDeployTransInfoData createTokenDeployTransInfoData(TokenDeployTransInfo thriftStruct) {
@@ -190,7 +210,7 @@ public class NodePojoConverter {
 
     public static TokenTransferTransInfoData createTokenTransferTransInfoData(TokenTransferTransInfo thriftStruct) {
         return new TokenTransferTransInfoData(thriftStruct.getCode(), thriftStruct.getSender(),
-            thriftStruct.getReceiver(), thriftStruct.getAmount());
+                                              thriftStruct.getReceiver(), thriftStruct.getAmount());
     }
 
     public static TransactionIdData createTransactionIdData(TransactionId thriftStruct) {
@@ -210,35 +230,52 @@ public class NodePojoConverter {
         }
     }
 
-    public static SmartContractInvocation createSmartContractInvocation(
-        SmartContractInvocationData smartContractInvocationData) {
+    public static SmartContractInvocation toSmartContractInvocation(SmartContractDeployData deployData, List<String> usedContracts) {
+        final var usedContractsByteBuffer = toByteBufferUsedContracts(usedContracts);
+        final var smartContractDeploy = smartContractDeployDataToSmartContractDeploy(deployData);
+        return new SmartContractInvocation("",
+                                           Collections.emptyList(),
+                                           usedContractsByteBuffer,
+                                           false,
+                                           SMART_CONTRACT_INVOCATION_VERSION)
+                .setSmartContractDeploy(smartContractDeploy);
+    }
 
-        final var thriftStruct = new SmartContractInvocation(smartContractInvocationData.getMethod(),
-                                                             smartContractInvocationData.getParams(),
-                                                             smartContractInvocationData.getUsedContracts(),
-                                                             smartContractInvocationData.isForgetNewState(),
-                                                             SMART_CONTRACT_INVOCATION_VERSION);
-        SmartContractDeployData smartContractDeployData = smartContractInvocationData.getSmartContractDeployData();
-        if (smartContractDeployData != null) {
-            thriftStruct.setSmartContractDeploy(smartContractDeployDataToSmartContractDeploy(smartContractDeployData));
-        }
+    public static SmartContractInvocation toSmartContractInvocation(SmartContractInvocationData invocationData) {
+        final List<ByteBuffer> usedContracts = toByteBufferUsedContracts(invocationData.getUsedContracts());
 
-        return thriftStruct;
+        return new SmartContractInvocation(invocationData.getMethod(),
+                                           invocationData.getParams(),
+                                           usedContracts,
+                                           invocationData.isForgetNewState(),
+                                           SMART_CONTRACT_INVOCATION_VERSION);
+    }
+
+    public static List<ByteBuffer> toByteBufferUsedContracts(List<String> usedContracts) {
+        return usedContracts
+                .stream()
+                .map(GeneralConverter::decodeFromBASE58)
+                .map(ByteBuffer::wrap)
+                .collect(toList());
     }
 
     public static SmartContractInvocationData createSmartContractInvocationData(SmartContractInvocation thriftStruct) {
 
-        return new SmartContractInvocationData(createSmartContractDeployData(thriftStruct.getSmartContractDeploy()),
-            thriftStruct.getMethod(),
-            thriftStruct.getParams(),
-            thriftStruct.getUsedContracts(), thriftStruct.forgetNewState);
+        final var stringListUsedContracts = thriftStruct.getUsedContracts()
+                .stream()
+                .map(ByteBuffer::array)
+                .map(GeneralConverter::encodeToBASE58)
+                .collect(toList());
+
+        return new SmartContractInvocationData(thriftStruct.getMethod(),
+                                               thriftStruct.getParams(),
+                                               stringListUsedContracts,
+                                               thriftStruct.forgetNewState);
     }
 
-    public static Transaction smartContractTransactionFlowDataToTransaction(
-        SmartContractTransactionFlowData scTransaction) {
-
+    public static Transaction smartContractTransactionFlowDataToTransaction(SmartContractTransactionFlowData scTransaction) {
         Transaction transaction = new Transaction();
-        transaction.id = scTransaction.getId();
+        transaction.id = scTransaction.getInnerId();
         transaction.source = ByteBuffer.wrap(scTransaction.getSource());
         transaction.target = ByteBuffer.wrap(scTransaction.getTarget());
         transaction.amount = null;
@@ -247,7 +284,7 @@ public class NodePojoConverter {
         transaction.signature = ByteBuffer.wrap(scTransaction.getSignature());
         transaction.fee = new AmountCommission(scTransaction.getOfferedMaxFee16Bits());
         SmartContractInvocation smartContractInvocation =
-            createSmartContractInvocation(scTransaction.getSmartContractData());
+                toSmartContractInvocation(scTransaction.getSmartContractData());
         transaction.setSmartContract(smartContractInvocation);
         transaction.setSmartContractIsSet(true);
         return transaction;
@@ -256,30 +293,76 @@ public class NodePojoConverter {
     public static SmartContractTransactionData createSmartContractTransactionData(SealedTransaction thriftStruct) {
         TransactionData transactionData = createTransactionData(thriftStruct);
         return new SmartContractTransactionData(transactionData,
-            thriftStruct.getTrxn().getSmartContract() == null ? null
-                : createSmartContractInvocationData(thriftStruct.getTrxn().getSmartContract()));
+                                                thriftStruct.getTrxn().getSmartContract() == null
+                                                ? null
+                                                : createSmartContractInvocationData(thriftStruct.getTrxn().getSmartContract()));
     }
 
-    public static TransactionFlowResultData transactionFlowResultToTransactionFlowResultData(
-        TransactionFlowResult result, byte[] source, byte[] target) {
+    public static TransactionFlowResultData toTransactionFlowResultData(TransactionFlowResult result,
+                                                                        byte[] source,
+                                                                        byte[] target) {
         return new TransactionFlowResultData(createApiResponseData(result.getStatus()), result.getRoundNum(), source,
-            target,
-            result.getSmart_contract_result());
+                                             target,
+                                             result.getSmart_contract_result());
     }
 
-    public static Transaction transactionFlowDataToTransaction(TransactionFlowData transactionData) {
+    public static Transaction toTransaction(TransactionFlowData transactionData) {
         Transaction transaction = new Transaction();
-        transaction.id = transactionData.getId();
+        transaction.id = transactionData.getInnerId();
         transaction.source = ByteBuffer.wrap(transactionData.getSource());
         transaction.target = ByteBuffer.wrap(transactionData.getTarget());
         transaction.amount = bigDecimalToAmount(transactionData.getAmount());
         transaction.fee = new AmountCommission(transactionData.getOfferedMaxFee16Bits());
-        if (transactionData.getCommentBytes() != null) {
-            transaction.userFields = ByteBuffer.wrap(transactionData.getCommentBytes());
-        }
-        if (transactionData.getSignature() != null) {
-            transaction.signature = ByteBuffer.wrap(transactionData.getSignature());
-        }
+        transaction.userFields = getUserFields(transactionData);
+        transaction.signature = transactionData.getSignature() != null ? ByteBuffer.wrap(transactionData.getSignature()) : null;
+        return transaction;
+    }
+
+    private static final byte UF_TYPE_INTEGER = 1;
+    private static final byte UF_TYPE_STRING = 2;
+
+    private static ByteBuffer getUserFields(TransactionFlowData transactionData) {
+        final var isCommentExist = transactionData.getCommentBytes() != null;
+        final var isDelegateOptionsExist = transactionData.getDelegationOptions() != 0;
+        final var ufBytes = new ByteArrayOutputStream();
+
+        rethrowUnchecked(() -> {
+            if (isDelegateOptionsExist) {
+                final byte markByte = 0;
+                final byte amountUserFields = (byte) (isCommentExist ? 2 : 1);
+                final int ufNumber = 5;
+                final long ufValue = transactionData.getDelegationOptions();
+
+                ufBytes.write(markByte);
+                ufBytes.write(amountUserFields);
+                ufBytes.write(toByteArrayLittleEndian(ufNumber, Integer.BYTES));
+                ufBytes.write(UF_TYPE_INTEGER);
+                ufBytes.write(toByteArrayLittleEndian(ufValue, Long.BYTES));
+
+                if (isCommentExist) {
+                    final int ufNumber2 = 6;
+                    final int ufStringLength = transactionData.getCommentBytes().length;
+                    final byte[] ufValue2 = transactionData.getCommentBytes();
+
+                    ufBytes.write(toByteArrayLittleEndian(ufNumber2, Integer.BYTES));
+                    ufBytes.write(UF_TYPE_STRING);
+                    ufBytes.write(toByteArrayLittleEndian(ufStringLength, Integer.BYTES));
+                    ufBytes.write(ufValue2);
+                }
+            } else {
+                if (isCommentExist) {
+                    ufBytes.write(transactionData.getCommentBytes());
+                }
+            }
+        });
+
+        return ByteBuffer.wrap(ufBytes.toByteArray());
+    }
+
+    public static Transaction toTransaction(TransactionFlowData transactionData, SmartContractInvocation smartContractInvocation) {
+        final var transaction = toTransaction(transactionData);
+        transaction.setSmartContract(smartContractInvocation);
+        transaction.setSmartContractIsSet(true);
         return transaction;
     }
 
@@ -288,6 +371,12 @@ public class NodePojoConverter {
         transactionId.setPoolSeq(transactionIdData.getPoolSequence());
         transactionId.setIndex(transactionIdData.getIndex());
         return transactionId;
+    }
+
+    public static TransactionIdData toTransactionIdData(TransactionId transactionId) {
+        final var index = transactionId.getIndex();
+        final var poolSeq = transactionId.getPoolSeq();
+        return new TransactionIdData(poolSeq, index);
     }
 
     public static long getShortTransactionId(long wideTransactionId) {
@@ -354,11 +443,11 @@ public class NodePojoConverter {
     }
 
     public static TransactionsStateGetResultData createTransactionsStateGetResultData(
-        TransactionsStateGetResult result) {
+            TransactionsStateGetResult result) {
         return new TransactionsStateGetResultData(createApiResponseData(result.getStatus()), result.getStates()
-            .entrySet()
-            .stream()
-            .collect(Collectors.toMap(e -> e.getKey(), e -> transactionStateToTransactionStateData(e.getValue()))),
-            result.getRoundNum());
+                .entrySet()
+                .stream()
+                .collect(toMap(e -> e.getKey(), e -> transactionStateToTransactionStateData(e.getValue()))),
+                                                  result.getRoundNum());
     }
 }

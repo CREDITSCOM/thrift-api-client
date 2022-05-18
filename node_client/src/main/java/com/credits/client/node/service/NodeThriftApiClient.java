@@ -78,7 +78,12 @@ public class NodeThriftApiClient implements NodeThriftApi {
 
     public SmartContractsListGetResult getSmartContracts(byte[] address) throws NodeClientException {
         API.Client client = pool.getResource();
-        return callThrift(client, () -> client.SmartContractsListGet(ByteBuffer.wrap(address)));
+        return callThrift(client, () -> client.SmartContractsListGet(ByteBuffer.wrap(address), 0, 0));
+    }
+
+    public SmartContractsListGetResult getSmartContracts(byte[] address, long offset, long limit) throws NodeClientException {
+        API.Client client = pool.getResource();
+        return callThrift(client, () -> client.SmartContractsListGet(ByteBuffer.wrap(address), offset, limit));
     }
 
     public SmartContractAddressesListGetResult getSmartContractAddresses(byte[] address) throws NodeClientException {
@@ -110,6 +115,12 @@ public class NodeThriftApiClient implements NodeThriftApi {
     public TransactionsStateGetResult getTransactionsState(byte[] address, List<Long> transactionIdList) throws NodeClientException {
         API.Client client = pool.getResource();
         return callThrift(client, () -> client.TransactionsStateGet(ByteBuffer.wrap(address),transactionIdList));
+    }
+
+    @Override
+    public PoolTransactionsGetResult getTransactionsFromPool(long poolNumber, long offset, long limit){
+        API.Client client = pool.getResource();
+        return callThrift(client, () -> client.PoolTransactionsGet(poolNumber, offset, limit));
     }
 
     private <R> R callThrift(API.Client client, Function<R> method) throws NodeClientException {

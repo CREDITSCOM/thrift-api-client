@@ -1,16 +1,21 @@
 package com.credits.general.util;
 
 import com.credits.general.exception.CreditsException;
+import com.credits.general.pojo.ByteCodeObjectData;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.math.BigDecimal;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import static com.credits.general.util.GeneralConverter.toInteger;
+import static com.credits.general.crypto.Blake2S.generateHash;
+import static com.credits.general.util.GeneralConverter.*;
 import static org.apache.commons.lang3.exception.ExceptionUtils.rethrow;
 
 
@@ -138,5 +143,22 @@ public class Utils {
             rethrow(e);
         }
         return null; //unreachable code
+    }
+
+    public static String generateSmartContractAddress(long innerTrxId, String deployerAddress, List<ByteCodeObjectData> byteCodeObjects) {
+        final var innerIdBytes = toByteArray(innerTrxId);
+
+        final var sliceId = Arrays.copyOfRange(innerIdBytes, 2, 8);
+        ArrayUtils.reverse(sliceId);
+
+        final var accountBytes = decodeFromBASE58(deployerAddress);
+        var seed = ArrayUtils.addAll(accountBytes, toByteArrayLittleEndian(sliceId, sliceId.length));
+
+        for (final var unit : byteCodeObjects) {
+            seed = ArrayUtils.addAll(seed, unit.getByteCode());
+        }
+        seed = toByteArrayLittleEndian(seed, seed.length);
+
+        return encodeToBASE58(generateHash(seed));
     }
 }

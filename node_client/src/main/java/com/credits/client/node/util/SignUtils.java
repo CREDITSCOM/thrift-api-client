@@ -28,6 +28,7 @@ public class SignUtils {
             byte[] tArr = printBytes("Transaction structure", getBytes(tStruct));
             byte[] signatureArr = Ed25519.sign(tArr, privateKey);
             signature = ByteBuffer.wrap(signatureArr);
+            printBytes("Transaction signature", signatureArr);
 
         } catch (Exception e) {
             LOGGER.error("Sign transaction is failed");
@@ -38,16 +39,18 @@ public class SignUtils {
 
     private static byte[] printBytes(String message, byte[] bytes) {
         if(bytes != null) {
-            StringBuilder arrStr = new StringBuilder();
-            LOGGER.debug("");
-            LOGGER.debug("----- {} -----", message);
-            LOGGER.debug("{} bytes", bytes.length);
+            if(LOGGER.isDebugEnabled()) {
+                StringBuilder arrStr = new StringBuilder();
+                LOGGER.debug("");
+                LOGGER.debug("----- {} -----", message);
+                LOGGER.debug("{} bytes", bytes.length);
 
-            for (byte b : bytes) {
-                arrStr.append(String.format("%02X", b));
+                for (byte b : bytes) {
+                    arrStr.append(String.format("%02X", b));
+                }
+                LOGGER.debug(arrStr.toString());
+                LOGGER.debug("--------------------------");
             }
-            LOGGER.debug(arrStr.toString());
-            LOGGER.debug("--------------------------");
         }
         return bytes;
     }
@@ -73,9 +76,14 @@ public class SignUtils {
             ufNum++;
         }
 
+        final var isDelegateTransaction = tStruct.getDelegationOptions() != 0;
+        if(isDelegateTransaction){
+            ufNum++;
+        }
+
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         try {
-            byte[] idBytes = GeneralConverter.toByteArrayLittleEndian(tStruct.getId(), 8);
+            byte[] idBytes = GeneralConverter.toByteArrayLittleEndian(tStruct.getInnerId(), 8);
             idBytes = ArrayUtils.remove(idBytes, 7); // delete two last bytes
             idBytes = ArrayUtils.remove(idBytes, 6);
             os.write(printBytes("id", idBytes));
@@ -89,6 +97,9 @@ public class SignUtils {
             if (tStruct.getSmartContractBytes() != null) {
                 os.write(printBytes("smartContractLen", GeneralConverter.toByteArrayLittleEndian(smartContractLen, 4)));
                 os.write(printBytes("smartContract", GeneralConverter.toByteArrayLittleEndian(tStruct.getSmartContractBytes(), smartContractLen)));
+            }
+            if(isDelegateTransaction){
+                os.write(printBytes("delegateOptions", GeneralConverter.toByteArrayLittleEndian(tStruct.getDelegationOptions(), 8)));
             }
             if (isCommentBytesExists) {
                 os.write(printBytes("commentLen", GeneralConverter.toByteArrayLittleEndian(commentBytes.length, 4)));

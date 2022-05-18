@@ -6,6 +6,7 @@ module node.client {
     requires eddsa;
     requires slf4j.api;
     requires org.apache.commons.lang3;
+    requires lombok;
     exports com.credits.client.node.exception;
     exports com.credits.client.node.pojo;
     exports com.credits.client.node.service;
